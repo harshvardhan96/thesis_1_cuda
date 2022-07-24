@@ -48,11 +48,12 @@ except:
 
 import aim
 
-assert torch.cuda.is_available(), 'You need to have an Nvidia GPU with CUDA installed.'
+# assert torch.cuda.is_available(), 'You need to have an Nvidia GPU with CUDA installed.'
 
 # Classifier
 from mobilenet_classifier import MobileNet
 from resnet_classifier import ResNet
+from segmentation_model import SegmentationModel
 
 # Encoders for debugging or additional testing
 import debug_encoders
@@ -296,8 +297,8 @@ def loss_backwards(fp16, loss, optimizer, loss_id, **kwargs):
 def gradient_penalty(images, output, weight=10):
     batch_size = images.shape[0]
     gradients = torch_grad(outputs=output, inputs=images,
-                           grad_outputs=torch.ones(output.size(), device=images.device),
-                           create_graph=True, retain_graph=True, only_inputs=True)[0]
+                           grad_outputs = torch.ones(output.size(), device=images.device),
+                           create_graph = True, retain_graph=True, only_inputs=True)[0]
 
     gradients = gradients.reshape(batch_size, -1)
     return weight * ((gradients.norm(2, dim=1) - 1) ** 2).mean()
@@ -317,7 +318,7 @@ def calc_pl_lengths(styles, images):
 
 
 def noise(n, latent_dim, device):
-    return torch.randn(n, latent_dim).cuda(device)
+    return torch.randn(n, latent_dim)
 
 
 def noise_list(n, layers, latent_dim, device):
@@ -334,7 +335,7 @@ def latent_to_w(style_vectorizer, latent_descr):
 
 
 def image_noise(n, im_size, device):
-    return torch.FloatTensor(n, im_size, im_size, 1).uniform_(0., 1.).cuda(device)
+    return torch.FloatTensor(n, im_size, im_size, 1).uniform_(0., 1.)
 
 
 def leaky_relu(p=0.2):
@@ -401,7 +402,7 @@ def dual_contrastive_loss(real_logits, fake_logits):
 
 
 # Our losses
-lpips_loss = lpips.LPIPS(net="alex").cuda(0)  # image should be RGB, IMPORTANT: normalized to [-1,1]
+lpips_loss = lpips.LPIPS(net="alex")  # image should be RGB, IMPORTANT: normalized to [-1,1]
 l1_loss = nn.L1Loss()
 kl_loss = nn.KLDivLoss(reduction="batchmean", log_target=True)
 
@@ -431,10 +432,10 @@ def classifier_kl_loss(real_classifier_logits, fake_classifier_logits):
     # else:
     #     print('?????????')
 
-    real_classifier_probabilities = F.log_softmax(real_classifier_logits, dim=1)
-    fake_classifier_probabilities = F.log_softmax(fake_classifier_logits, dim=1)
+    # real_classifier_probabilities = F.log_softmax(real_classifier_logits, dim=1)
+    # fake_classifier_probabilities = F.log_softmax(fake_classifier_logits, dim=1)
 
-    loss = kl_loss(fake_classifier_probabilities, real_classifier_probabilities)
+    loss = kl_loss(fake_classifier_logits, real_classifier_logits)
     return loss
 
 
@@ -697,15 +698,18 @@ class GeneratorBlock(nn.Module):
         noise1 = self.to_noise1(inoise).permute((0, 3, 2, 1))
         noise2 = self.to_noise2(inoise).permute((0, 3, 2, 1))
 
+        print("Before style1:", istyle.shape)
         style1 = self.to_style1(istyle)
-
+        print("After style1:", style1.shape)
         # Perturb here
 
         x = self.conv1(x, style1)
         x = self.activation(x + noise1)
-
+        print("Before style2:", istyle.shape)
         style2 = self.to_style2(istyle)
+        print("After style2:", style2.shape)
 
+        # shape of style_coords: (4,1024)
         style_coords = torch.cat([style1, style2], dim=-1)
 
         # Perturb here
@@ -811,7 +815,7 @@ class Generator(nn.Module):
         for style, block, attn in zip(styles, self.blocks, self.attns):
             if exists(attn):
                 x = attn(x)
-
+            print('Before calling block:',x.shape,style.shape,input_noise.shape)
             x, rgb, style_coords = block(x, rgb, style, input_noise)
 
             if get_style_coords:
@@ -910,7 +914,7 @@ class DiscriminatorE(nn.Module):
 
 
 class StylEx(nn.Module):
-    def __init__(self, image_size, latent_dim=514, fmap_max=512, style_depth=8, network_capacity=16, transparent=False,
+    def __init__(self, image_size, latent_dim=512, fmap_max=512, style_depth=8, network_capacity=16, transparent=False,
                  fp16=False, cl_reg=False, steps=1, lr=1e-4, ttur_mult=2, fq_layers=[], fq_dict_size=256,
                  attn_layers=[], no_const=False, lr_mlp=0.1, rank=0, classifier_labels=2, encoder_class=None, kl_rec_during_disc=False):
         super().__init__()
@@ -962,7 +966,7 @@ class StylEx(nn.Module):
         self._init_weights()
         self.reset_parameter_averaging()
 
-        self.cuda(rank)
+        # self.cuda(rank)
 
         # startup apex mixed precision
         self.fp16 = fp16
@@ -1156,8 +1160,11 @@ class Trainer():
         if classifier_name.lower() == "resnet":
             self.classifier = ResNet(classifier_path, cuda_rank=rank, output_size=self.num_classes,
                                      image_size=image_size)
-        else:
+        elif classifier_name.lower() == "mobilenet":
             self.classifier = MobileNet(classifier_path, cuda_rank=rank, output_size=self.num_classes,
+                                        image_size=image_size)  # Automatically put into eval mode
+        elif classifier_name.lower() == "segmentation":
+            self.classifier = SegmentationModel(classifier_path, cuda_rank=rank, output_size=self.num_classes,
                                         image_size=image_size)  # Automatically put into eval mode
 
         # Load tensorboard, create writer
@@ -1254,10 +1261,10 @@ class Trainer():
 
         self.StylEx.encoder.train()
         self.StylEx.train()
-        total_disc_loss = torch.tensor(0.).cuda(self.rank)
-        total_gen_loss = torch.tensor(0.).cuda(self.rank)
-        total_rec_loss = torch.tensor(0.).cuda(self.rank)
-        total_kl_loss = torch.tensor(0.).cuda(self.rank)
+        total_disc_loss = torch.tensor(0.)
+        total_gen_loss = torch.tensor(0.)
+        total_rec_loss = torch.tensor(0.)
+        total_kl_loss = torch.tensor(0.)
 
         batch_size = math.ceil(self.batch_size / self.world_size)
 
@@ -1300,17 +1307,33 @@ class Trainer():
             encoder_input = False
 
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[D_aug, S, G]):
-            discriminator_batch = next(self.loader).cuda(self.rank)
+            discriminator_batch = next(self.loader)
             discriminator_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
-                encoder_batch = next(self.loader).cuda(self.rank)
+                encoder_batch = next(self.loader)
                 encoder_batch.requires_grad_()
 
+                # Original Classifier
+
+                # encoder_output = self.StylEx.encoder(encoder_batch)
+                # # encoder_output shape : (4,512)
+                # real_classified_logits = self.classifier.classify_images(encoder_batch)
+                # # logits shape: (4,2)
+                # style = [(torch.cat((encoder_output, real_classified_logits), dim=1),
+                #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix, shape is list:1
+                # noise = image_noise(batch_size, image_size, device=self.rank)
+                #
+                # w_styles = styles_def_to_tensor(style)
+                # # shape(4,5,514)
+
+                # Segmenation Model changes
+
                 encoder_output = self.StylEx.encoder(encoder_batch)
-                real_classified_logits = self.classifier.classify_images(encoder_batch)
-                style = [(torch.cat((encoder_output, real_classified_logits), dim=1),
-                          self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
+                real_classified_logits = self.classifier.get_segmentation_logits(encoder_batch)
+                # style_concat = [(torch.cat((encoder_output, real_classified_logits), dim=1),
+                #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
+                style = [(encoder_output, self.StylEx.G.num_layers)]
                 noise = image_noise(batch_size, image_size, device=self.rank)
 
                 w_styles = styles_def_to_tensor(style)
@@ -1327,6 +1350,7 @@ class Trainer():
                 if self.alternating_training:
                     encoder_input = True
 
+            # (4,5,514),(4,64,64,1)
             generated_images = G(w_styles, noise)
             fake_output = D_aug(generated_images.clone().detach(), detach=True, **aug_kwargs)
 
@@ -1367,19 +1391,35 @@ class Trainer():
         self.StylEx.G_opt.zero_grad()
 
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[S, G, D_aug]):
-            image_batch = next(self.loader).cuda(self.rank)
+            image_batch = next(self.loader)
 
             image_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
-                encoder_output = self.StylEx.encoder(image_batch)
-                real_classified_logits = self.classifier.classify_images(image_batch)
 
-                style = [(torch.cat((encoder_output, real_classified_logits), dim=1), self.StylEx.G.num_layers)]
+                # Original Generator training code
+
+                # encoder_output = self.StylEx.encoder(image_batch)
+                # real_classified_logits = self.classifier.classify_images(image_batch)
+                #
+                # # style = [(torch.cat((encoder_output, real_classified_logits), dim=1), self.StylEx.G.num_layers)]
+                # style = encoder_output
+                # noise = image_noise(batch_size, image_size, device=self.rank)
+                # w_styles = styles_def_to_tensor(style)
+
+                # Segmentation Generator training code
+
+                encoder_output = self.StylEx.encoder(encoder_batch)
+                real_classified_logits = self.classifier.get_segmentation_logits(encoder_batch)
+                # style_concat = [(torch.cat((encoder_output, real_classified_logits), dim=1),
+                #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
+                style = [(encoder_output, self.StylEx.G.num_layers)]
                 noise = image_noise(batch_size, image_size, device=self.rank)
 
                 w_styles = styles_def_to_tensor(style)
+
             else:
+
                 style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
                 noise = image_noise(batch_size, image_size, device=self.rank)
 
@@ -1387,14 +1427,15 @@ class Trainer():
                 w_styles = styles_def_to_tensor(w_space)
 
             generated_images = G(w_styles, noise)
-            gen_image_classified_logits = self.classifier.classify_images(generated_images)
+            # gen_image_classified_logits = self.classifier.classify_images(generated_images)
+            gen_image_classified_logits = self.classifier.get_segmentation_logits(generated_images)
 
             fake_output = D_aug(generated_images, **aug_kwargs)
             fake_output_loss = fake_output
 
             real_output = None
             if G_requires_reals:
-                image_batch = next(self.loader).cuda(self.rank)
+                image_batch = next(self.loader)
                 real_output, _ = D_aug(image_batch, detach=True, **aug_kwargs)
                 real_output = real_output.detach()
 
@@ -1523,13 +1564,15 @@ class Trainer():
 
         # regular
         from_encoder_string = ""
-        image_batch = next(self.loader).cuda(self.rank)
+        image_batch = next(self.loader)
 
         if encoder_input:
             from_encoder_string = "from_encoder"
             with torch.no_grad():
-                real_classified_logits = self.classifier.classify_images(image_batch)
-                w = [(torch.cat((self.StylEx.encoder(image_batch), real_classified_logits), dim=1), num_layers)]
+                # real_classified_logits = self.classifier.classify_images(image_batch)
+                real_classified_logits = self.classifier.get_segmentation_logits(image_batch)
+                w = [(self.StylEx.encoder(image_batch), num_layers)]sa
+                #[(encoder_output, self.StylEx.G.num_layers)]
             num_rows = len(image_batch)
         else:
             w = None
@@ -1558,7 +1601,7 @@ class Trainer():
             repeat_idx[dim] = n_tile
             a = a.repeat(*(repeat_idx))
             order_index = torch.LongTensor(
-                np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)])).cuda(self.rank)
+                np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)]))
             return torch.index_select(a, dim, order_index)
 
         nn = noise(num_rows, latent_dim, device=self.rank)
@@ -1577,7 +1620,7 @@ class Trainer():
     @torch.no_grad()
     def calculate_fid(self, num_batches):
         from pytorch_fid import fid_score
-        torch.cuda.empty_cache()
+        # torch.cuda.empty_cache()
 
         real_path = self.fid_dir / 'real'
         fake_path = self.fid_dir / 'fake'
@@ -1633,7 +1676,7 @@ class Trainer():
             self.av = np.mean(samples, axis=0)
             self.av = np.expand_dims(self.av, axis=0)
 
-        av_torch = torch.from_numpy(self.av).cuda(self.rank)
+        av_torch = torch.from_numpy(self.av)
         tensor = trunc_psi * (tensor - av_torch) + av_torch
         return tensor
 
@@ -1780,7 +1823,7 @@ class ModelLoader:
         self.model.load(load_from)
 
     def noise_to_styles(self, noise, trunc_psi=None):
-        noise = noise.cuda()
+        noise = noise
         w = self.model.StylEx.SE(noise)
         if exists(trunc_psi):
             w = self.model.truncate_style(w)

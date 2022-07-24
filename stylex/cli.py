@@ -1,4 +1,4 @@
-# Imports
+# Importsb
 import os
 import fire
 import random
@@ -82,13 +82,15 @@ def run_training(rank, world_size, model_args, data, load_from, new, num_train_s
 
 
 def train_from_folder(
-        data='../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized',
+        # data='./data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized/',
+        data='./data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/',
         results_dir='./results',
         models_dir='./models',
         name='Faces-Resnet-64',  # Name of the experiment.
         new=False,
         load_from=-1,
-        image_size=64,
+        image_size=256,
+        # image_size=64,
         network_capacity=16,  # 16
         fmap_max=512,
         transparent=False,
@@ -136,14 +138,15 @@ def train_from_folder(
         rec_scaling=1,
 
         # Classifier name <MobileNet or ResNet> (non case sensitive)
-        classifier_name="resnet",
+        classifier_name="segmentation",
+        # classifier_name="resnet",
 
         # Path to the classifier
-        classifier_path="mobilenet-64px-gender.pth",
+        classifier_path="resnet-18-64px-gender.pt",
 
         # This shouldn't ever be changed since we're working with
         # binary classification.
-        num_classes=2,
+        num_classes=19,
 
         # If unspecified, use the Discriminator as an encoder (like the authors did).
         # This is the way to go if we want to be close to the original paper.
