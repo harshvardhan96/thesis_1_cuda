@@ -27,6 +27,7 @@ class CelebASegmentation(data.Dataset):
     print("subdir",len(subdirs[2][0]))
     for file in subdirs[2]:
         # print(os.path.join(self.root,file))
+        # print(os.path.join(self.root,file))
         curr_images = [os.path.join(self.root,file)]
         self.images += curr_images
     # print("len",self.images[0])

@@ -45,9 +45,9 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
     # assert torch.cuda.is_available()
     torch.backends.cudnn.benchmark = True
     print(os.getcwd())
-    model_fname = './stylex/trained_classifiers/deeplab_model.pth'
+    model_fname = './trained_classifiers/deeplab_model.pth'
     # dataset_root = 'ffhq_aging{}x{}'.format(resolution,resolution)
-    dataset_root = './data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized/'
+    dataset_root = '../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/'
     assert os.path.isdir(dataset_root)
     dataset = CelebASegmentation(dataset_root, crop_size=513)
 
@@ -67,7 +67,7 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
         weight_std=True,
         beta=False)
 
-    model = model
+    model = model.cuda()
     model.eval()
     # if not os.path.isfile(deeplab_file_spec['file_path']):
     #     print('Downloading DeeplabV3 Model parameters')
@@ -76,8 +76,9 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
     #
     #     print('Done!')
 
-    checkpoint = torch.load(model_fname,map_location=torch.device('cpu'))
+    checkpoint = torch.load(model_fname)
     state_dict = {k[7:]: v for k, v in checkpoint['state_dict'].items() if 'tracked' not in k}
+    # print("state dict",state_dict)
     model.load_state_dict(state_dict)
 
     return model

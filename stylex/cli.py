@@ -61,6 +61,7 @@ def run_training(rank, world_size, model_args, data, load_from, new, num_train_s
     model = Trainer(**model_args)
 
     if not new:
+        print("load from",load_from)
         model.load(load_from)
     else:
         model.clear()

@@ -48,7 +48,7 @@ except:
 
 import aim
 
-# assert torch.cuda.is_available(), 'You need to have an Nvidia GPU with CUDA installed.'
+assert torch.cuda.is_available(), 'You need to have an Nvidia GPU with CUDA installed.'
 
 # Classifier
 from mobilenet_classifier import MobileNet
@@ -318,7 +318,7 @@ def calc_pl_lengths(styles, images):
 
 
 def noise(n, latent_dim, device):
-    return torch.randn(n, latent_dim)
+    return torch.randn(n, latent_dim).cuda(device)
 
 
 def noise_list(n, layers, latent_dim, device):
@@ -335,7 +335,7 @@ def latent_to_w(style_vectorizer, latent_descr):
 
 
 def image_noise(n, im_size, device):
-    return torch.FloatTensor(n, im_size, im_size, 1).uniform_(0., 1.)
+    return torch.FloatTensor(n, im_size, im_size, 1).uniform_(0., 1.).cuda(device)
 
 
 def leaky_relu(p=0.2):
@@ -402,7 +402,7 @@ def dual_contrastive_loss(real_logits, fake_logits):
 
 
 # Our losses
-lpips_loss = lpips.LPIPS(net="alex")  # image should be RGB, IMPORTANT: normalized to [-1,1]
+lpips_loss = lpips.LPIPS(net="alex").cuda(0)  # image should be RGB, IMPORTANT: normalized to [-1,1]
 l1_loss = nn.L1Loss()
 kl_loss = nn.KLDivLoss(reduction="batchmean", log_target=True)
 
@@ -966,7 +966,7 @@ class StylEx(nn.Module):
         self._init_weights()
         self.reset_parameter_averaging()
 
-        # self.cuda(rank)
+        self.cuda(rank)
 
         # startup apex mixed precision
         self.fp16 = fp16
@@ -1206,6 +1206,7 @@ class Trainer():
         self.config_path.write_text(json.dumps(self.config()))
 
     def load_config(self):
+        print("Inside load config")
         config = self.config() if not self.config_path.exists() else json.loads(self.config_path.read_text())
         self.image_size = config['image_size']
         self.network_capacity = config['network_capacity']
@@ -1261,10 +1262,10 @@ class Trainer():
 
         self.StylEx.encoder.train()
         self.StylEx.train()
-        total_disc_loss = torch.tensor(0.)
-        total_gen_loss = torch.tensor(0.)
-        total_rec_loss = torch.tensor(0.)
-        total_kl_loss = torch.tensor(0.)
+        total_disc_loss = torch.tensor(0.).cuda(self.rank)
+        total_gen_loss = torch.tensor(0.).cuda(self.rank)
+        total_rec_loss = torch.tensor(0.).cuda(self.rank)
+        total_kl_loss = torch.tensor(0.).cuda(self.rank)
 
         batch_size = math.ceil(self.batch_size / self.world_size)
 
@@ -1307,11 +1308,11 @@ class Trainer():
             encoder_input = False
 
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[D_aug, S, G]):
-            discriminator_batch = next(self.loader)
+            discriminator_batch = next(self.loader).cuda(self.rank)
             discriminator_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
-                encoder_batch = next(self.loader)
+                encoder_batch = next(self.loader).cuda(self.rank)
                 encoder_batch.requires_grad_()
 
                 # Original Classifier
@@ -1391,7 +1392,7 @@ class Trainer():
         self.StylEx.G_opt.zero_grad()
 
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[S, G, D_aug]):
-            image_batch = next(self.loader)
+            image_batch = next(self.loader).cuda(self.rank)
 
             image_batch.requires_grad_()
 
@@ -1435,7 +1436,7 @@ class Trainer():
 
             real_output = None
             if G_requires_reals:
-                image_batch = next(self.loader)
+                image_batch = next(self.loader).cuda(self.rank)
                 real_output, _ = D_aug(image_batch, detach=True, **aug_kwargs)
                 real_output = real_output.detach()
 
@@ -1564,14 +1565,14 @@ class Trainer():
 
         # regular
         from_encoder_string = ""
-        image_batch = next(self.loader)
+        image_batch = next(self.loader).cuda(self.rank)
 
         if encoder_input:
             from_encoder_string = "from_encoder"
             with torch.no_grad():
                 # real_classified_logits = self.classifier.classify_images(image_batch)
                 real_classified_logits = self.classifier.get_segmentation_logits(image_batch)
-                w = [(self.StylEx.encoder(image_batch), num_layers)]sa
+                w = [(self.StylEx.encoder(image_batch), num_layers)]
                 #[(encoder_output, self.StylEx.G.num_layers)]
             num_rows = len(image_batch)
         else:
@@ -1601,7 +1602,7 @@ class Trainer():
             repeat_idx[dim] = n_tile
             a = a.repeat(*(repeat_idx))
             order_index = torch.LongTensor(
-                np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)]))
+                np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)])).cuda(self.rank)
             return torch.index_select(a, dim, order_index)
 
         nn = noise(num_rows, latent_dim, device=self.rank)
@@ -1620,7 +1621,7 @@ class Trainer():
     @torch.no_grad()
     def calculate_fid(self, num_batches):
         from pytorch_fid import fid_score
-        # torch.cuda.empty_cache()
+        torch.cuda.empty_cache()
 
         real_path = self.fid_dir / 'real'
         fake_path = self.fid_dir / 'fake'
@@ -1676,7 +1677,7 @@ class Trainer():
             self.av = np.mean(samples, axis=0)
             self.av = np.expand_dims(self.av, axis=0)
 
-        av_torch = torch.from_numpy(self.av)
+        av_torch = torch.from_numpy(self.av).cuda(self.rank)
         tensor = trunc_psi * (tensor - av_torch) + av_torch
         return tensor
 
@@ -1792,8 +1793,11 @@ class Trainer():
         self.load_config()
 
         name = num
+        print("name",name)
+        
         if num == -1:
             file_paths = [p for p in Path(self.models_dir / self.name).glob('model_*.pt')]
+            print("file path model:",file_paths)
             saved_nums = sorted(map(lambda x: int(x.stem.split('_')[1]), file_paths))
             if len(saved_nums) == 0:
                 return
@@ -1803,11 +1807,13 @@ class Trainer():
         self.steps = name * self.save_every
 
         load_data = torch.load(self.model_name(name))
+        
 
         if 'version' in load_data:
             print(f"loading from version {load_data['version']}")
 
         try:
+            print("version",load_data['StylEx'])
             self.StylEx.load_state_dict(load_data['StylEx'])
         except Exception as e:
             print(
@@ -1823,7 +1829,7 @@ class ModelLoader:
         self.model.load(load_from)
 
     def noise_to_styles(self, noise, trunc_psi=None):
-        noise = noise
+        noise = noise.cuda()
         w = self.model.StylEx.SE(noise)
         if exists(trunc_psi):
             w = self.model.truncate_style(w)
