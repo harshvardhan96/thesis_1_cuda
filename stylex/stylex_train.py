@@ -698,16 +698,16 @@ class GeneratorBlock(nn.Module):
         noise1 = self.to_noise1(inoise).permute((0, 3, 2, 1))
         noise2 = self.to_noise2(inoise).permute((0, 3, 2, 1))
 
-        print("Before style1:", istyle.shape)
+        # print("Before style1:", istyle.shape)
         style1 = self.to_style1(istyle)
-        print("After style1:", style1.shape)
+        # print("After style1:", style1.shape)
         # Perturb here
 
         x = self.conv1(x, style1)
         x = self.activation(x + noise1)
-        print("Before style2:", istyle.shape)
+        # print("Before style2:", istyle.shape)
         style2 = self.to_style2(istyle)
-        print("After style2:", style2.shape)
+        # print("After style2:", style2.shape)
 
         # shape of style_coords: (4,1024)
         style_coords = torch.cat([style1, style2], dim=-1)
@@ -815,7 +815,7 @@ class Generator(nn.Module):
         for style, block, attn in zip(styles, self.blocks, self.attns):
             if exists(attn):
                 x = attn(x)
-            print('Before calling block:',x.shape,style.shape,input_noise.shape)
+            # print('Before calling block:',x.shape,style.shape,input_noise.shape)
             x, rgb, style_coords = block(x, rgb, style, input_noise)
 
             if get_style_coords:
@@ -1268,6 +1268,8 @@ class Trainer():
         total_kl_loss = torch.tensor(0.).cuda(self.rank)
 
         batch_size = math.ceil(self.batch_size / self.world_size)
+        
+        print("batch size:",batch_size)
 
         image_size = self.StylEx.G.image_size
         latent_dim = self.StylEx.G.latent_dim
@@ -1334,6 +1336,7 @@ class Trainer():
                 real_classified_logits = self.classifier.get_segmentation_logits(encoder_batch)
                 # style_concat = [(torch.cat((encoder_output, real_classified_logits), dim=1),
                 #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
+                # print("Discriminator logits:", real_classified_logits)
                 style = [(encoder_output, self.StylEx.G.num_layers)]
                 noise = image_noise(batch_size, image_size, device=self.rank)
 
@@ -1793,11 +1796,11 @@ class Trainer():
         self.load_config()
 
         name = num
-        print("name",name)
+        # print("name",name)
         
         if num == -1:
             file_paths = [p for p in Path(self.models_dir / self.name).glob('model_*.pt')]
-            print("file path model:",file_paths)
+            # print("file path model:",file_paths)
             saved_nums = sorted(map(lambda x: int(x.stem.split('_')[1]), file_paths))
             if len(saved_nums) == 0:
                 return
@@ -1813,7 +1816,8 @@ class Trainer():
             print(f"loading from version {load_data['version']}")
 
         try:
-            print("version",load_data['StylEx'])
+            # print("version",load_data['StylEx'])
+            print(f"loading model from {load_data['StylEx']}")
             self.StylEx.load_state_dict(load_data['StylEx'])
         except Exception as e:
             print(

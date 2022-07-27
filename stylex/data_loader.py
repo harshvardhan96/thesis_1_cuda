@@ -22,9 +22,9 @@ class CelebASegmentation(data.Dataset):
     self.crop_size = crop_size
 
     self.images = []
-    print("root",root)
+    # print("root",root)
     subdirs = next(os.walk(self.root))#quick trick to get all subdirectories
-    print("subdir",len(subdirs[2][0]))
+    # print("subdir",len(subdirs[2][0]))
     for file in subdirs[2]:
         # print(os.path.join(self.root,file))
         # print(os.path.join(self.root,file))

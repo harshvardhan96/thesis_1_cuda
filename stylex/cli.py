@@ -84,25 +84,25 @@ def run_training(rank, world_size, model_args, data, load_from, new, num_train_s
 
 def train_from_folder(
         # data='./data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized/',
-        data='./data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/',
+        data='/home/jovyan/thesis/thesis_experiment_1/data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/',
         results_dir='./results',
         models_dir='./models',
         name='Faces-Resnet-64',  # Name of the experiment.
-        new=False,
+        new=True,
         load_from=-1,
         image_size=256,
         # image_size=64,
         network_capacity=16,  # 16
         fmap_max=512,
         transparent=False,
-        batch_size=4,
+        batch_size=8,
         gradient_accumulate_every=8,
         num_train_steps=150000,
         learning_rate=2e-4,
         lr_mlp=0.1,
         ttur_mult=1.5,
         rel_disc_loss=False,
-        num_workers=3,  # None
+        num_workers=2,  # None
         save_every=500,  # 1000
         evaluate_every=50,  # 1000
         generate=False,
@@ -259,4 +259,6 @@ def main():
 
 
 if __name__ == '__main__':
+    num_of_gpus = torch.cuda.device_count()
+    print("Number of GPUS:",num_of_gpus)
     main()

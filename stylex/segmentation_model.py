@@ -67,7 +67,7 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
         weight_std=True,
         beta=False)
 
-    model = model.cuda()
+    model = model.cuda(cuda_rank)
     model.eval()
     # if not os.path.isfile(deeplab_file_spec['file_path']):
     #     print('Downloading DeeplabV3 Model parameters')
