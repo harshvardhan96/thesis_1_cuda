@@ -10,6 +10,8 @@ from functools import wraps
 import torch
 import torch.multiprocessing as mp
 import torch.distributed as dist
+import torch_xla
+import torch_xla.core.xla_model as xm
 
 import numpy as np
 

@@ -8,6 +8,8 @@ import torch.nn as nn
 from pdb import set_trace as st
 from PIL import Image
 from torchvision import transforms
+import torch_xla
+import torch_xla.core.xla_model as xm
 
 import deeplab
 from data_loader import CelebASegmentation
@@ -35,6 +37,8 @@ c_pallet = np.array([[[0, 0, 0],
                       [0, 51, 0],
                       [255, 153, 51],
                       [0, 204, 0]]], np.uint8) / 255
+
+device = xm.xla_device()
 
 def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 2) -> torch.nn.Module:
     """
@@ -67,7 +71,7 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
         weight_std=True,
         beta=False)
 
-    model = model.cuda(cuda_rank)
+    model = model.to(device)
     model.eval()
     # if not os.path.isfile(deeplab_file_spec['file_path']):
     #     print('Downloading DeeplabV3 Model parameters')

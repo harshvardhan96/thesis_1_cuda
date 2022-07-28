@@ -15,6 +15,7 @@ from functools import partial
 import multiprocessing
 from contextlib import contextmanager, ExitStack
 
+
 import numpy as np
 
 import torch
@@ -25,6 +26,8 @@ import torch.nn.functional as F
 from torch.autograd import grad as torch_grad
 from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
+import torch_xla
+import torch_xla.core.xla_model as xm
 
 from einops import rearrange, repeat
 from kornia.filters import filter2d
@@ -48,7 +51,7 @@ except:
 
 import aim
 
-assert torch.cuda.is_available(), 'You need to have an Nvidia GPU with CUDA installed.'
+# assert torch.cuda.is_available(), 'You need to have an Nvidia GPU with CUDA installed.'
 
 # Classifier
 from mobilenet_classifier import MobileNet
@@ -62,7 +65,7 @@ import debug_encoders
 
 NUM_CORES = multiprocessing.cpu_count()
 EXTS = ['jpg', 'jpeg', 'png']
-
+device = xm.xla_device()
 
 # helper classes
 
@@ -318,7 +321,7 @@ def calc_pl_lengths(styles, images):
 
 
 def noise(n, latent_dim, device):
-    return torch.randn(n, latent_dim).cuda(device)
+    return torch.randn(n, latent_dim).to(device)
 
 
 def noise_list(n, layers, latent_dim, device):
@@ -335,7 +338,7 @@ def latent_to_w(style_vectorizer, latent_descr):
 
 
 def image_noise(n, im_size, device):
-    return torch.FloatTensor(n, im_size, im_size, 1).uniform_(0., 1.).cuda(device)
+    return torch.FloatTensor(n, im_size, im_size, 1).uniform_(0., 1.).to(device)
 
 
 def leaky_relu(p=0.2):
@@ -402,7 +405,7 @@ def dual_contrastive_loss(real_logits, fake_logits):
 
 
 # Our losses
-lpips_loss = lpips.LPIPS(net="alex").cuda(0)  # image should be RGB, IMPORTANT: normalized to [-1,1]
+lpips_loss = lpips.LPIPS(net="alex").to(device)  # image should be RGB, IMPORTANT: normalized to [-1,1]
 l1_loss = nn.L1Loss()
 kl_loss = nn.KLDivLoss(reduction="batchmean", log_target=True)
 
@@ -966,7 +969,7 @@ class StylEx(nn.Module):
         self._init_weights()
         self.reset_parameter_averaging()
 
-        self.cuda(rank)
+        # self.cuda(rank)
 
         # startup apex mixed precision
         self.fp16 = fp16
@@ -1262,10 +1265,10 @@ class Trainer():
 
         self.StylEx.encoder.train()
         self.StylEx.train()
-        total_disc_loss = torch.tensor(0.).cuda(self.rank)
-        total_gen_loss = torch.tensor(0.).cuda(self.rank)
-        total_rec_loss = torch.tensor(0.).cuda(self.rank)
-        total_kl_loss = torch.tensor(0.).cuda(self.rank)
+        total_disc_loss = torch.tensor(0.).to(device)
+        total_gen_loss = torch.tensor(0.).to(device)
+        total_rec_loss = torch.tensor(0.).to(device)
+        total_kl_loss = torch.tensor(0.).to(device)
 
         batch_size = math.ceil(self.batch_size / self.world_size)
         
@@ -1310,11 +1313,11 @@ class Trainer():
             encoder_input = False
 
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[D_aug, S, G]):
-            discriminator_batch = next(self.loader).cuda(self.rank)
+            discriminator_batch = next(self.loader).to(device)
             discriminator_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
-                encoder_batch = next(self.loader).cuda(self.rank)
+                encoder_batch = next(self.loader).to(device)
                 encoder_batch.requires_grad_()
 
                 # Original Classifier
@@ -1395,7 +1398,7 @@ class Trainer():
         self.StylEx.G_opt.zero_grad()
 
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[S, G, D_aug]):
-            image_batch = next(self.loader).cuda(self.rank)
+            image_batch = next(self.loader).to(device)
 
             image_batch.requires_grad_()
 
@@ -1439,7 +1442,7 @@ class Trainer():
 
             real_output = None
             if G_requires_reals:
-                image_batch = next(self.loader).cuda(self.rank)
+                image_batch = next(self.loader).to(device)
                 real_output, _ = D_aug(image_batch, detach=True, **aug_kwargs)
                 real_output = real_output.detach()
 
@@ -1568,7 +1571,7 @@ class Trainer():
 
         # regular
         from_encoder_string = ""
-        image_batch = next(self.loader).cuda(self.rank)
+        image_batch = next(self.loader).to(device)
 
         if encoder_input:
             from_encoder_string = "from_encoder"
@@ -1605,7 +1608,7 @@ class Trainer():
             repeat_idx[dim] = n_tile
             a = a.repeat(*(repeat_idx))
             order_index = torch.LongTensor(
-                np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)])).cuda(self.rank)
+                np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)])).to(device)
             return torch.index_select(a, dim, order_index)
 
         nn = noise(num_rows, latent_dim, device=self.rank)
@@ -1680,7 +1683,7 @@ class Trainer():
             self.av = np.mean(samples, axis=0)
             self.av = np.expand_dims(self.av, axis=0)
 
-        av_torch = torch.from_numpy(self.av).cuda(self.rank)
+        av_torch = torch.from_numpy(self.av).to(device)
         tensor = trunc_psi * (tensor - av_torch) + av_torch
         return tensor
 
@@ -1833,7 +1836,7 @@ class ModelLoader:
         self.model.load(load_from)
 
     def noise_to_styles(self, noise, trunc_psi=None):
-        noise = noise.cuda()
+        noise = noise.to(device)
         w = self.model.StylEx.SE(noise)
         if exists(trunc_psi):
             w = self.model.truncate_style(w)
