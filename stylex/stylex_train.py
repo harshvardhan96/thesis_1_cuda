@@ -334,6 +334,8 @@ def mixed_list(n, layers, latent_dim, device):
 
 
 def latent_to_w(style_vectorizer, latent_descr):
+    print("type of style vectorizer:", type(style_vectorizer))
+    print("type of latent desc:", type(latent_descr))
     return [(style_vectorizer(z), num_layers) for z, num_layers in latent_descr]
 
 
@@ -1357,10 +1359,11 @@ class Trainer():
                 # print("style device:", style.device)
 
                 # print("noise device:", noise.device)
-
+                # print(type(style))
                 w_space = latent_to_w(S, style)
+                print("1362:executed latent_to_w")
                 w_styles = styles_def_to_tensor(w_space)
-
+                print("1364:executed styles_def_to_tensor")
                 if self.alternating_training:
                     encoder_input = True
 
