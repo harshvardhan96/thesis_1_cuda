@@ -1341,15 +1341,18 @@ class Trainer():
                 #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
                 # print("Discriminator logits:", real_classified_logits)
                 style = [(encoder_output, self.StylEx.G.num_layers)]
-                noise = image_noise(batch_size, image_size, device=self.rank)
+                # noise = image_noise(batch_size, image_size, device=self.rank)
+                noise = image_noise(batch_size, image_size, device=device)
 
                 w_styles = styles_def_to_tensor(style)
 
                 encoder_input = False
             else:
                 get_latents_fn = mixed_list if random() < self.mixed_prob else noise_list
-                style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
-                noise = image_noise(batch_size, image_size, device=self.rank)
+                # style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
+                style = get_latents_fn(batch_size, num_layers, latent_dim, device=device)
+                # noise = image_noise(batch_size, image_size, device=self.rank)
+                noise = image_noise(batch_size, image_size, device=device)
 
                 w_space = latent_to_w(S, style)
                 w_styles = styles_def_to_tensor(w_space)
@@ -1421,14 +1424,17 @@ class Trainer():
                 # style_concat = [(torch.cat((encoder_output, real_classified_logits), dim=1),
                 #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
                 style = [(encoder_output, self.StylEx.G.num_layers)]
-                noise = image_noise(batch_size, image_size, device=self.rank)
+                # noise = image_noise(batch_size, image_size, device=self.rank)
+                noise = image_noise(batch_size, image_size, device=device)
 
                 w_styles = styles_def_to_tensor(style)
 
             else:
 
-                style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
+                # style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
+                style = get_latents_fn(batch_size, num_layers, latent_dim, device=device)
                 noise = image_noise(batch_size, image_size, device=self.rank)
+                noise = image_noise(batch_size, image_size, device=device)
 
                 w_space = latent_to_w(S, style)
                 w_styles = styles_def_to_tensor(w_space)
@@ -1566,8 +1572,10 @@ class Trainer():
 
         # latents and noise
 
-        latents = noise_list(num_rows ** 2, num_layers, latent_dim, device=self.rank)
-        n = image_noise(num_rows ** 2, image_size, device=self.rank)
+        # latents = noise_list(num_rows ** 2, num_layers, latent_dim, device=self.rank)
+        latents = noise_list(num_rows ** 2, num_layers, latent_dim, device=device)
+        # n = image_noise(num_rows ** 2, image_size, device=self.rank)
+        n = image_noise(num_rows ** 2, image_size, device=device)
 
         # regular
         from_encoder_string = ""
@@ -1611,7 +1619,8 @@ class Trainer():
                 np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)])).to(device)
             return torch.index_select(a, dim, order_index)
 
-        nn = noise(num_rows, latent_dim, device=self.rank)
+        # nn = noise(num_rows, latent_dim, device=self.rank)
+        nn = noise(num_rows, latent_dim, device=device)
         tmp1 = tile(nn, 0, num_rows)
         tmp2 = nn.repeat(num_rows, 1)
 
@@ -1658,8 +1667,10 @@ class Trainer():
 
         for batch_num in tqdm(range(num_batches), desc='calculating FID - saving generated'):
             # latents and noise
-            latents = noise_list(self.batch_size, num_layers, latent_dim, device=self.rank)
-            noise = image_noise(self.batch_size, image_size, device=self.rank)
+            # latents = noise_list(self.batch_size, num_layers, latent_dim, device=self.rank)
+            latents = noise_list(self.batch_size, num_layers, latent_dim, device=device)
+            # noise = image_noise(self.batch_size, image_size, device=self.rank)
+            noise = image_noise(self.batch_size, image_size, device=device)
 
             # moving averages
             generated_images = self.generate_truncated(self.StylEx.SE, self.StylEx.GE, latents, noise,
@@ -1678,7 +1689,8 @@ class Trainer():
         latent_dim = self.StylEx.G.latent_dim
 
         if not exists(self.av):
-            z = noise(2000, latent_dim, device=self.rank)
+            # z = noise(2000, latent_dim, device=self.rank)
+            z = noise(2000, latent_dim, device=device)
             samples = evaluate_in_chunks(batch_size, S, z).cpu().numpy()
             self.av = np.mean(samples, axis=0)
             self.av = np.expand_dims(self.av, axis=0)
@@ -1717,9 +1729,12 @@ class Trainer():
 
         # latents and noise
 
-        latents_low = noise(num_rows ** 2, latent_dim, device=self.rank)
-        latents_high = noise(num_rows ** 2, latent_dim, device=self.rank)
-        n = image_noise(num_rows ** 2, image_size, device=self.rank)
+        # latents_low = noise(num_rows ** 2, latent_dim, device=self.rank)
+        latents_low = noise(num_rows ** 2, latent_dim, device=device)
+        # latents_high = noise(num_rows ** 2, latent_dim, device=self.rank)
+        latents_high = noise(num_rows ** 2, latent_dim, device=device)
+        # n = image_noise(num_rows ** 2, image_size, device=self.rank)
+        n = image_noise(num_rows ** 2, image_size, device=device)
 
         ratios = torch.linspace(0., 8., num_steps)
 
