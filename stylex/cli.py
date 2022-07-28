@@ -86,7 +86,7 @@ def run_training(rank, world_size, model_args, data, load_from, new, num_train_s
 
 def train_from_folder(
         # data='./data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized/',
-        data='../../../input/flickrfaceshq-dataset-nvidia-resized-256px/',
+        data='../../../input/resized-sub-1/resized_sub/',
         results_dir='./results',
         models_dir='./models',
         name='Faces-Resnet-64',  # Name of the experiment.
