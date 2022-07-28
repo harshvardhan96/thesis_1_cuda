@@ -17,6 +17,8 @@ from torch.nn import functional as F
 
 __all__ = ['ResNet', 'resnet50', 'resnet101', 'resnet152']
 
+device = xm.xla_device()
+
 
 model_urls = {
     'resnet50': 'https://download.pytorch.org/models/resnet50-19c8e357.pth',
@@ -232,7 +234,7 @@ def resnet101(pretrained=False, num_groups=None, weight_std=False, **kwargs):
     if pretrained:
         model_dict = model.state_dict()
         if num_groups and weight_std:
-            pretrained_dict = torch.load('../../../input/trained-classifiers/trained_classifiers/R-101-GN-WS.pth.tar')
+            pretrained_dict = torch.load('../../../input/trained-classifiers/trained_classifiers/R-101-GN-WS.pth.tar').to(device)
             overlap_dict = {k[7:]: v for k, v in pretrained_dict.items() if k[7:] in model_dict}
             assert len(overlap_dict) == 312
         elif not num_groups and not weight_std:
