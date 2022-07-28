@@ -80,7 +80,7 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
     #
     #     print('Done!')
 
-    checkpoint = torch.load(model_fname)
+    checkpoint = torch.load(model_fname, map_location=torch.device("cpu"))
     state_dict = {k[7:]: v for k, v in checkpoint['state_dict'].items() if 'tracked' not in k}
     # print("state dict",state_dict)
     model.load_state_dict(state_dict)
