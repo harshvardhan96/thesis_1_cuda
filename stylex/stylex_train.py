@@ -1291,8 +1291,11 @@ class Trainer():
         S = self.StylEx.S if not self.is_ddp else self.S_ddp
         S.to(device)
         G = self.StylEx.G if not self.is_ddp else self.G_ddp
+        G.to(device)
         D = self.StylEx.D if not self.is_ddp else self.D_ddp
+        D.to(device)
         D_aug = self.StylEx.D_aug if not self.is_ddp else self.D_aug_ddp
+        D_aug.to(device)
 
         backwards = partial(loss_backwards, self.fp16)
 
