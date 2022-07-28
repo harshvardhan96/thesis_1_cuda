@@ -1446,7 +1446,7 @@ class Trainer():
 
                 # style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
                 style = get_latents_fn(batch_size, num_layers, latent_dim, device=device)
-                noise = image_noise(batch_size, image_size, device=self.rank)
+                # noise = image_noise(batch_size, image_size, device=self.rank)
                 noise = image_noise(batch_size, image_size, device=device)
 
                 w_space = latent_to_w(S, style)
