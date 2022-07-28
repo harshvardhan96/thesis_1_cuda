@@ -1238,6 +1238,8 @@ class Trainer():
                                    aug_prob=self.dataset_aug_prob)
             num_workers = num_workers = default(self.num_workers, NUM_CORES if not self.is_ddp else 0)
 
+            print("Number of workers:", num_workers)
+
             sampler = DistributedSampler(self.dataset, rank=self.rank, num_replicas=self.world_size,
                                          shuffle=True) if self.is_ddp else None
 
