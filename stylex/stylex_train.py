@@ -1353,10 +1353,10 @@ class Trainer():
                 style = get_latents_fn(batch_size, num_layers, latent_dim, device=device)
                 # noise = image_noise(batch_size, image_size, device=self.rank)
                 noise = image_noise(batch_size, image_size, device=device)
-                print("device:", device)
-                print("style device:", style.device)
+                print("line number 1356: device:", device)
+                # print("style device:", style.device)
 
-                print("noise device:", noise.device)
+                # print("noise device:", noise.device)
 
                 w_space = latent_to_w(S, style)
                 w_styles = styles_def_to_tensor(w_space)
