@@ -13,6 +13,8 @@ import torch.nn as nn
 import math
 import torch.utils.model_zoo as model_zoo
 from torch.nn import functional as F
+import torch_xla
+import torch_xla.core.xla_model as xm
 
 
 __all__ = ['ResNet', 'resnet50', 'resnet101', 'resnet152']
