@@ -49,7 +49,7 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
     # assert torch.cuda.is_available()
     torch.backends.cudnn.benchmark = True
     print(os.getcwd())
-    model_fname = './trained_classifiers/deeplab_model.pth'
+    model_fname = '../../../input/trained-classifiers/trained_classifiers/deeplab_model.pth'
     # dataset_root = 'ffhq_aging{}x{}'.format(resolution,resolution)
     dataset_root = '../../../input/flickrfaceshq-dataset-nvidia-resized-256px/'
     assert os.path.isdir(dataset_root)
