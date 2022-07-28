@@ -1289,6 +1289,7 @@ class Trainer():
         apply_cl_reg_to_generated = self.steps > 20000
 
         S = self.StylEx.S if not self.is_ddp else self.S_ddp
+        S.to(device)
         G = self.StylEx.G if not self.is_ddp else self.G_ddp
         D = self.StylEx.D if not self.is_ddp else self.D_ddp
         D_aug = self.StylEx.D_aug if not self.is_ddp else self.D_aug_ddp
@@ -1352,9 +1353,9 @@ class Trainer():
             else:
                 get_latents_fn = mixed_list if random() < self.mixed_prob else noise_list
                 # style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
-                style = get_latents_fn(batch_size, num_layers, latent_dim, device="cpu")
+                style = get_latents_fn(batch_size, num_layers, latent_dim, device=device)
                 # noise = image_noise(batch_size, image_size, device=self.rank)
-                noise = image_noise(batch_size, image_size, device="cpu")
+                noise = image_noise(batch_size, image_size, device=device)
                 print("line number 1356: device:", device)
                 # print("style device:", style.device)
 
