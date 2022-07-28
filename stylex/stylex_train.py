@@ -1352,7 +1352,7 @@ class Trainer():
             else:
                 get_latents_fn = mixed_list if random() < self.mixed_prob else noise_list
                 # style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
-                style = get_latents_fn(batch_size, num_layers, latent_dim, device=device)
+                style = get_latents_fn(batch_size, num_layers, latent_dim, device="cpu")
                 # noise = image_noise(batch_size, image_size, device=self.rank)
                 noise = image_noise(batch_size, image_size, device=device)
                 print("line number 1356: device:", device)
