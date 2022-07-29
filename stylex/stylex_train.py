@@ -1365,7 +1365,6 @@ class Trainer():
                 noise = image_noise(batch_size, image_size, device=device)
                 print("line number 1356: device:", device)
                 # print("style device:", style.device)
-
                 # print("noise device:", noise.device)
                 # print(type(style))
                 w_space = latent_to_w(S, style)
@@ -1377,6 +1376,7 @@ class Trainer():
 
             # (4,5,514),(4,64,64,1)
             generated_images = G(w_styles, noise)
+            print("1378: Generated Images")
             fake_output = D_aug(generated_images.clone().detach(), detach=True, **aug_kwargs)
 
             real_output = D_aug(discriminator_batch, **aug_kwargs)
@@ -1402,6 +1402,7 @@ class Trainer():
             backwards(disc_loss, self.StylEx.D_opt, loss_id=1)
 
             total_disc_loss += divergence.detach().item() / self.gradient_accumulate_every
+            print("1393: Total disc loss", total_disc_loss)
 
         self.d_loss = float(total_disc_loss)
         self.track(self.d_loss, 'D')
@@ -1445,7 +1446,6 @@ class Trainer():
                 w_styles = styles_def_to_tensor(style)
 
             else:
-
                 # style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
                 style = get_latents_fn(batch_size, num_layers, latent_dim, device=device)
                 # noise = image_noise(batch_size, image_size, device=self.rank)
@@ -1454,7 +1454,10 @@ class Trainer():
                 w_space = latent_to_w(S, style)
                 w_styles = styles_def_to_tensor(w_space)
 
+                print("1457: Train Generator first time completed")
+
             generated_images = G(w_styles, noise)
+            print("1460: Generated images after training Generator")
             # gen_image_classified_logits = self.classifier.classify_images(generated_images)
             gen_image_classified_logits = self.classifier.get_segmentation_logits(generated_images)
 
