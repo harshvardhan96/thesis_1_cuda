@@ -1329,6 +1329,9 @@ class Trainer():
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[D_aug, S, G]):
             print("1330: Loading batch with i value as:", i)
             discriminator_batch = next(self.loader).to(device)
+
+            print("1333: discriminator_batch size", discriminator_batch.shape)
+
             print("1332: Loaded batch succussfully")
             discriminator_batch.requires_grad_()
 
