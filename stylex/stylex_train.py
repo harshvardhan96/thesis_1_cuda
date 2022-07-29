@@ -1650,7 +1650,7 @@ class Trainer():
 
     @torch.no_grad()
     def calculate_fid(self, num_batches):
-        from pytorch_fid import fid_score
+        # from pytorch_fid import fid_score
         torch.cuda.empty_cache()
 
         real_path = self.fid_dir / 'real'
