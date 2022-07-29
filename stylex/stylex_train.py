@@ -1279,7 +1279,7 @@ class Trainer():
         batch_size = math.ceil(self.batch_size / self.world_size)
         
         print("batch size:",batch_size)
-
+        print("Training started")
         image_size = self.StylEx.G.image_size
         latent_dim = self.StylEx.G.latent_dim
         num_layers = self.StylEx.G.num_layers
@@ -1292,6 +1292,8 @@ class Trainer():
         apply_path_penalty = not self.no_pl_reg and self.steps > 5000 and self.steps % 32 == 0
         apply_cl_reg_to_generated = self.steps > 20000
 
+        print("Converting models to device.")
+        print("Device:", device)
         S = self.StylEx.S if not self.is_ddp else self.S_ddp
         S.to(device)
         G = self.StylEx.G if not self.is_ddp else self.G_ddp
@@ -1301,8 +1303,9 @@ class Trainer():
         D_aug = self.StylEx.D_aug if not self.is_ddp else self.D_aug_ddp
         D_aug.to(device)
 
+        print("1306: Before backprop")
         backwards = partial(loss_backwards, self.fp16)
-
+        print("1307: After backprop")
         # setup losses
 
         if not self.dual_contrast_loss:
@@ -1322,8 +1325,11 @@ class Trainer():
         if self.alternating_training:
             encoder_input = False
 
+        print("1327: Entering for loop.")
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[D_aug, S, G]):
+            print("1330: Loading batch with i value as:", i)
             discriminator_batch = next(self.loader).to(device)
+            print("1332: Loaded batch succussfully")
             discriminator_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
@@ -1344,7 +1350,7 @@ class Trainer():
                 # # shape(4,5,514)
 
                 # Segmenation Model changes
-
+                print("1353: Before encoder output in discriminator")
                 encoder_output = self.StylEx.encoder(encoder_batch)
                 real_classified_logits = self.classifier.get_segmentation_logits(encoder_batch)
                 # style_concat = [(torch.cat((encoder_output, real_classified_logits), dim=1),
@@ -1355,7 +1361,7 @@ class Trainer():
                 noise = image_noise(batch_size, image_size, device=device)
 
                 w_styles = styles_def_to_tensor(style)
-
+                print("1364: After converting encoder output to w_styles")
                 encoder_input = False
             else:
                 get_latents_fn = mixed_list if random() < self.mixed_prob else noise_list
