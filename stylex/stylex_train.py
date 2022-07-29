@@ -41,6 +41,7 @@ from vector_quantize_pytorch import VectorQuantize
 
 from PIL import Image
 from pathlib import Path
+import timeit
 
 try:
     from apex import amp
@@ -1326,6 +1327,8 @@ class Trainer():
             encoder_input = False
 
         print("1327: Entering for loop.")
+
+        start_time = timeit.default_timer()
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[D_aug, S, G]):
             print("1330: Loading batch with i value as:", i)
             discriminator_batch = next(self.loader).to(device)
@@ -1413,6 +1416,7 @@ class Trainer():
             total_disc_loss += divergence.detach().item() / self.gradient_accumulate_every
             print("1393: Total disc loss", total_disc_loss)
 
+        print("Time taken to run for loop for Discrimnator:",timeit.default_timer() - start_time)
         self.d_loss = float(total_disc_loss)
         self.track(self.d_loss, 'D')
 
@@ -1425,6 +1429,7 @@ class Trainer():
 
         self.StylEx.G_opt.zero_grad()
 
+        start_time = timeit.default_timer()
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[S, G, D_aug]):
             image_batch = next(self.loader).to(device)
 
@@ -1533,6 +1538,7 @@ class Trainer():
                 self.g_loss = float(total_gen_loss)
 
             encoder_input = not encoder_input
+        print("Time taken to run for loop for generator:", timeit.default_timer() - start_time)
 
         # If writer exists, write losses
         if exists(self.tb_writer):
