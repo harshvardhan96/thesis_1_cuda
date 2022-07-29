@@ -49,9 +49,9 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
     # assert torch.cuda.is_available()
     torch.backends.cudnn.benchmark = True
     print(os.getcwd())
-    model_fname = '../../../input/trained-classifiers/trained_classifiers/deeplab_model.pth'
+    model_fname = './trained_classifiers/deeplab_model.pth'
     # dataset_root = 'ffhq_aging{}x{}'.format(resolution,resolution)
-    dataset_root = '../../../input/resized-sub-1/resized_sub/'
+    dataset_root = '../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/'
     assert os.path.isdir(dataset_root)
     dataset = CelebASegmentation(dataset_root, crop_size=513)
 
