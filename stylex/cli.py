@@ -104,7 +104,7 @@ def train_from_folder(
         lr_mlp=0.1,
         ttur_mult=1.5,
         rel_disc_loss=False,
-        num_workers=64,  # None
+        num_workers=32,  # None
         save_every=500,  # 1000
         evaluate_every=50,  # 1000
         generate=False,
