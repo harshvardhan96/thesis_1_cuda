@@ -1385,7 +1385,7 @@ class Trainer():
                 # style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
                 style = get_latents_fn(batch_size, num_layers, latent_dim, device="cpu")
                 # noise = image_noise(batch_size, image_size, device=self.rank)
-                noise = image_noise(batch_size, image_size, device=device)
+                noise = image_noise(batch_size, image_size, device="cpu")
                 print("line number 1356: device:", device)
                 # print("style device:", style.device)
                 # print("noise device:", noise.device)
