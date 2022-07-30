@@ -1352,7 +1352,7 @@ class Trainer():
             discriminator_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
-                encoder_batch = next(self.loader).to(device)
+                encoder_batch = next(self.loader)
                 encoder_batch.requires_grad_()
 
                 # Original Classifier
