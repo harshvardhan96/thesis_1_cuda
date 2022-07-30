@@ -28,6 +28,9 @@ from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
 import torch_xla
 import torch_xla.core.xla_model as xm
+import torch_xla.debug.metrics as met
+
+print(met.metrics_report())
 
 from einops import rearrange, repeat
 from kornia.filters import filter2d
@@ -61,6 +64,9 @@ from segmentation_model import SegmentationModel
 
 # Encoders for debugging or additional testing
 import debug_encoders
+
+
+
 
 # constants
 
