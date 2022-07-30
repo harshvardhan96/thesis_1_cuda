@@ -1406,7 +1406,7 @@ class Trainer():
             print("1378: Generated Images")
             fake_output = D_aug(generated_images.clone().detach(), detach=True, **aug_kwargs)
 
-            real_output = D_aug(discriminator_batch.clone().detach(), **aug_kwargs)
+            real_output = D_aug(discriminator_batch.to("cpu"), **aug_kwargs)
 
             real_output_loss = real_output
             fake_output_loss = fake_output
