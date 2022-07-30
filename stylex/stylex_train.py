@@ -1371,8 +1371,7 @@ class Trainer():
                 # Segmenation Model changes
                 print("1353: Before encoder output in discriminator")
                 encoder_output = self.StylEx.encoder(encoder_batch)
-                encoder_output.to(device)
-                real_classified_logits = self.classifier.get_segmentation_logits(encoder_batch)
+                real_classified_logits = self.classifier.get_segmentation_logits(encoder_batch.to(device))
                 # style_concat = [(torch.cat((encoder_output, real_classified_logits), dim=1),
                 #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
                 # print("Discriminator logits:", real_classified_logits)
