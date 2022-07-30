@@ -1479,7 +1479,7 @@ class Trainer():
                 #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
                 style = [(encoder_output, self.StylEx.G.num_layers)]
                 # noise = image_noise(batch_size, image_size, device=self.rank)
-                noise = image_noise(batch_size, image_size, device=device)
+                noise = image_noise(batch_size, image_size, device="cpu")
 
                 w_styles = styles_def_to_tensor(style)
 
