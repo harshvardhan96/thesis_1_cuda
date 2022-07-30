@@ -1665,7 +1665,7 @@ class Trainer():
             from_encoder_string = "from_encoder"
             with torch.no_grad():
                 # real_classified_logits = self.classifier.classify_images(image_batch)
-                real_classified_logits = self.classifier.get_segmentation_logits(image_batch)
+                # real_classified_logits = self.classifier.get_segmentation_logits(image_batch)
                 w = [(self.StylEx.encoder(image_batch), num_layers)]
                 #[(encoder_output, self.StylEx.G.num_layers)]
             num_rows = len(image_batch)
