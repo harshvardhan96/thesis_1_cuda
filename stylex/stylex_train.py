@@ -1554,6 +1554,8 @@ class Trainer():
         print("Time taken to run for loop for generator:", timeit.default_timer() - start_time)
 
         # If writer exists, write losses
+
+        print("1158: If writer is true:", self.tb_writer)
         if exists(self.tb_writer):
             self.tb_writer.add_scalar('loss/G', self.g_loss, self.steps)
             self.tb_writer.add_scalar('loss/D', self.d_loss, self.steps)
@@ -1564,20 +1566,30 @@ class Trainer():
         self.track(self.total_rec_loss, 'Rec')
         self.track(self.total_kl_loss, 'KL')
 
+        print("1569: Running StylEx.G_opt.step")
+
         self.StylEx.G_opt.step()
 
+        print("1569: Finished running StylEx.G_opt.step")
         # calculate moving averages
 
+        print("Running first if at line 1576")
         if apply_path_penalty and not np.isnan(avg_pl_length):
             self.pl_mean = self.pl_length_ma.update_average(self.pl_mean, avg_pl_length)
             self.track(self.pl_mean, 'PL')
 
+        print("Completed running first if")
+
+        print("Running second if")
         if self.is_main and self.steps % 10 == 0 and self.steps > 20000:
             self.StylEx.EMA()
+        print("Completed running second if")
 
+        print("Running third if")
         if self.is_main and self.steps <= 25000 and self.steps % 1000 == 2:
             self.StylEx.reset_parameter_averaging()
 
+        print("Completed running third if")
         # save from NaN errors
 
         if any(torch.isnan(l) for l in (total_gen_loss, total_disc_loss)):
@@ -1586,14 +1598,22 @@ class Trainer():
             raise NanException
 
         # periodically save results
+        print("Starting to save periodic results")
 
         if self.is_main:
+
+            print("Saving checkpoint at line 1605.. Step:",self.steps)
             if self.steps % self.save_every == 0:
                 self.save(self.checkpoint_num)
+            print("completed saving checkpoint")
 
+            print("Evaluating at line 1610.. Step:", self.steps)
             if self.steps % self.evaluate_every == 0 or (self.steps % 100 == 0 and self.steps < 2500):
                 self.evaluate(encoder_input=self.sample_from_encoder, num=floor(self.steps / self.evaluate_every))
 
+            print("done evaluating at line 1613")
+
+            print("Computing FID at line 1616...")
             if exists(self.calculate_fid_every) and self.steps % self.calculate_fid_every == 0 and self.steps != 0:
                 num_batches = math.ceil(self.calculate_fid_num_images / self.batch_size)
                 fid = self.calculate_fid(num_batches)
@@ -1601,6 +1621,8 @@ class Trainer():
 
                 with open(str(self.results_dir / self.name / f'fid_scores.txt'), 'a') as f:
                     f.write(f'{self.steps},{fid}\n')
+
+            print("Done computing FID at line 1625.")
 
         self.steps += 1
         print("Step incremented:", self.steps)
