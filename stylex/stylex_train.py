@@ -943,7 +943,7 @@ class StylEx(nn.Module):
         else:
             self.encoder = debug_encoders.encoder_dict[encoder_class]
 
-        self.encoder.to(device)
+        # self.encoder.to(device)
 
         self.S = StyleVectorizer(latent_dim, style_depth, lr_mul=lr_mlp)
         self.S
