@@ -1477,7 +1477,7 @@ class Trainer():
                 # style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
                 style = get_latents_fn(batch_size, num_layers, latent_dim, device="cpu")
                 # noise = image_noise(batch_size, image_size, device=self.rank)
-                noise = image_noise(batch_size, image_size, device=device)
+                noise = image_noise(batch_size, image_size, device="cpu")
 
                 w_space = latent_to_w(S, style)
                 w_styles = styles_def_to_tensor(w_space)
