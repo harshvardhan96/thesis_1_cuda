@@ -1473,8 +1473,8 @@ class Trainer():
 
                 # Segmentation Generator training code
 
-                encoder_output = self.StylEx.encoder(encoder_batch)
-                real_classified_logits = self.classifier.get_segmentation_logits(encoder_batch.to(device))
+                encoder_output = self.StylEx.encoder(image_batch)
+                real_classified_logits = self.classifier.get_segmentation_logits(image_batch.to(device))
                 # style_concat = [(torch.cat((encoder_output, real_classified_logits), dim=1),
                 #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
                 style = [(encoder_output, self.StylEx.G.num_layers)]
