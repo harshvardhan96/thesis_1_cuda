@@ -946,18 +946,16 @@ class StylEx(nn.Module):
         self.encoder.to(device)
 
         self.S = StyleVectorizer(latent_dim, style_depth, lr_mul=lr_mlp)
-        self.S.to(device)
+        self.S
         self.G = Generator(image_size, latent_dim, network_capacity, transparent=transparent, attn_layers=attn_layers,
                            no_const=no_const, fmap_max=fmap_max)
-        self.G.to(device)
         self.D = DiscriminatorE(image_size, network_capacity, fq_layers=fq_layers, fq_dict_size=fq_dict_size,
                                 attn_layers=attn_layers, transparent=transparent, fmap_max=fmap_max)
-        self.D.to(device)
+
         self.SE = StyleVectorizer(latent_dim, style_depth, lr_mul=lr_mlp)
-        self.SE.to(device)
         self.GE = Generator(image_size, latent_dim, network_capacity, transparent=transparent, attn_layers=attn_layers,
                             no_const=no_const)
-        self.GE.to(device)
+
         self.D_cl = None
 
         # Is turned off by default
