@@ -1609,7 +1609,7 @@ class Trainer():
 
             print("Evaluating at line 1610.. Step:", self.steps)
             if self.steps % self.evaluate_every == 0 or (self.steps % 100 == 0 and self.steps < 2500):
-                self.evaluate(encoder_input=self.sample_from_encoder, num=floor(self.steps / self.evaluate_every))
+                self.evaluate(encoder_input=self.sample_from_encoder, num=floor(self.steps / self.evaluate_every), saveImages = False)
 
             print("done evaluating at line 1613")
 
@@ -1629,7 +1629,7 @@ class Trainer():
         self.av = None
 
     @torch.no_grad()
-    def evaluate(self, encoder_input=False, num=0, trunc=1.0):
+    def evaluate(self, encoder_input=False, num=0, trunc=1.0, saveImages = True):
         self.StylEx.eval()
         # ext = self.image_extension  TODO: originally only png if self.transparency was enabled
         ext = "png"
@@ -1662,45 +1662,48 @@ class Trainer():
             w = None
 
         # pass images here
+        print("Skipping saving images in evaluation.")
 
-        generated_images = self.generate_truncated(self.StylEx.S, self.StylEx.G, latents, n, w=w,
-                                                   trunc_psi=self.trunc_psi)
-        torchvision.utils.save_image(torch.cat((image_batch, generated_images)),
-                                     str(self.results_dir / self.name / f'{str(num)}-{from_encoder_string}.{ext}'),
-                                     nrow=num_rows)
+        if saveImages:
 
-        # moving averages
+            generated_images = self.generate_truncated(self.StylEx.S, self.StylEx.G, latents, n, w=w,
+                                                       trunc_psi=self.trunc_psi)
+            torchvision.utils.save_image(torch.cat((image_batch, generated_images)),
+                                         str(self.results_dir / self.name / f'{str(num)}-{from_encoder_string}.{ext}'),
+                                         nrow=num_rows)
 
-        generated_images = self.generate_truncated(self.StylEx.SE, self.StylEx.GE, latents, n, w=w,
-                                                   trunc_psi=self.trunc_psi)
-        torchvision.utils.save_image(torch.cat((image_batch, generated_images)),
-                                     str(self.results_dir / self.name / f'{str(num)}-{from_encoder_string}-ema.{ext}'),
-                                     nrow=num_rows)
+            # moving averages
 
-        # mixing regularities
+            generated_images = self.generate_truncated(self.StylEx.SE, self.StylEx.GE, latents, n, w=w,
+                                                       trunc_psi=self.trunc_psi)
+            torchvision.utils.save_image(torch.cat((image_batch, generated_images)),
+                                         str(self.results_dir / self.name / f'{str(num)}-{from_encoder_string}-ema.{ext}'),
+                                         nrow=num_rows)
 
-        def tile(a, dim, n_tile):
-            init_dim = a.size(dim)
-            repeat_idx = [1] * a.dim()
-            repeat_idx[dim] = n_tile
-            a = a.repeat(*(repeat_idx))
-            order_index = torch.LongTensor(
-                np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)])).to(device)
-            return torch.index_select(a, dim, order_index)
+            # mixing regularities
 
-        # nn = noise(num_rows, latent_dim, device=self.rank)
-        nn = noise(num_rows, latent_dim, device=device)
-        tmp1 = tile(nn, 0, num_rows)
-        tmp2 = nn.repeat(num_rows, 1)
+            def tile(a, dim, n_tile):
+                init_dim = a.size(dim)
+                repeat_idx = [1] * a.dim()
+                repeat_idx[dim] = n_tile
+                a = a.repeat(*(repeat_idx))
+                order_index = torch.LongTensor(
+                    np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)])).to(device)
+                return torch.index_select(a, dim, order_index)
 
-        tt = int(num_layers / 2)
-        mixed_latents = [(tmp1, tt), (tmp2, num_layers - tt)]
+            # nn = noise(num_rows, latent_dim, device=self.rank)
+            nn = noise(num_rows, latent_dim, device=device)
+            tmp1 = tile(nn, 0, num_rows)
+            tmp2 = nn.repeat(num_rows, 1)
 
-        generated_images = self.generate_truncated(self.StylEx.SE, self.StylEx.GE, mixed_latents, n,
-                                                   trunc_psi=self.trunc_psi)
-        torchvision.utils.save_image(torch.cat((image_batch, generated_images)),
-                                     str(self.results_dir / self.name / f'{str(num)}-{from_encoder_string}-mr.{ext}'),
-                                     nrow=num_rows)
+            tt = int(num_layers / 2)
+            mixed_latents = [(tmp1, tt), (tmp2, num_layers - tt)]
+
+            generated_images = self.generate_truncated(self.StylEx.SE, self.StylEx.GE, mixed_latents, n,
+                                                       trunc_psi=self.trunc_psi)
+            torchvision.utils.save_image(torch.cat((image_batch, generated_images)),
+                                         str(self.results_dir / self.name / f'{str(num)}-{from_encoder_string}-mr.{ext}'),
+                                         nrow=num_rows)
 
     @torch.no_grad()
     def calculate_fid(self, num_batches):

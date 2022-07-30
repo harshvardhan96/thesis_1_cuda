@@ -231,7 +231,7 @@ def train_from_folder(
         model.load(load_from)
         samples_name = timestamped_filename()
         for num in tqdm(range(num_generate)):
-            model.evaluate(f'{samples_name}-{num}', num_image_tiles)
+            model.evaluate(f'{samples_name}-{num}', num_image_tiles, saveImages = False)
         print(f'sample images generated at {results_dir}/{name}/{samples_name}')
         return
 
