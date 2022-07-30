@@ -1475,7 +1475,7 @@ class Trainer():
 
             else:
                 # style = get_latents_fn(batch_size, num_layers, latent_dim, device=self.rank)
-                style = get_latents_fn(batch_size, num_layers, latent_dim, device=device)
+                style = get_latents_fn(batch_size, num_layers, latent_dim, device="cpu")
                 # noise = image_noise(batch_size, image_size, device=self.rank)
                 noise = image_noise(batch_size, image_size, device=device)
 
