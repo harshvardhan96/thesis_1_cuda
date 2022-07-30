@@ -1497,7 +1497,7 @@ class Trainer():
             generated_images = G(w_styles, noise)
             print("1460: Generated images after training Generator")
             # gen_image_classified_logits = self.classifier.classify_images(generated_images)
-            gen_image_classified_logits = self.classifier.get_segmentation_logits(generated_images)
+            gen_image_classified_logits = self.classifier.get_segmentation_logits(generated_images.to(device))
 
             fake_output = D_aug(generated_images, **aug_kwargs)
             fake_output_loss = fake_output
