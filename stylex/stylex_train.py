@@ -1329,12 +1329,12 @@ class Trainer():
         print("1327: Entering for loop.")
 
         n = gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[D_aug, S, G])
-        print("Gradient epoch:", n)
+        print("Gradient epoch:", len(n))
 
 
         start_time = timeit.default_timer()
-        for i in n:
-            print("1330: Loading batch with i value as:", i)
+        for idx,i in enumerate(n):
+            print("1330: Loading batch with i value as:", idx)
             discriminator_batch = next(self.loader).to(device)
 
             print("1333: discriminator_batch size", discriminator_batch.shape)
