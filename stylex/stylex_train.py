@@ -305,6 +305,8 @@ def loss_backwards(fp16, loss, optimizer, loss_id, **kwargs):
 
 
 def gradient_penalty(images, output, weight=10):
+    print("Images deivce:", images.device)
+    print("Output device:", output.device)
     batch_size = images.shape[0]
     gradients = torch_grad(outputs=output, inputs=images,
                            grad_outputs = torch.ones(output.size(), device=images.device),
