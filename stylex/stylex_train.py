@@ -1400,6 +1400,9 @@ class Trainer():
 
             # (4,5,514),(4,64,64,1)
             generated_images = G(w_styles, noise)
+
+            print("Generated images device:", generated_images.device)
+
             print("1378: Generated Images")
             fake_output = D_aug(generated_images.clone().detach(), detach=True, **aug_kwargs)
 
