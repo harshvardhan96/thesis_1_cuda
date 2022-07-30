@@ -1602,10 +1602,10 @@ class Trainer():
 
         if self.is_main:
 
-            print("Saving checkpoint at line 1605.. Step:",self.steps)
-            if self.steps % self.save_every == 0:
-                self.save(self.checkpoint_num)
-            print("completed saving checkpoint")
+            # print("Saving checkpoint at line 1605.. Step:",self.steps)
+            # if self.steps % self.save_every == 0:
+            #     self.save(self.checkpoint_num)
+            # print("completed saving checkpoint")
 
             print("Evaluating at line 1610.. Step:", self.steps)
             if self.steps % self.evaluate_every == 0 or (self.steps % 100 == 0 and self.steps < 2500):
