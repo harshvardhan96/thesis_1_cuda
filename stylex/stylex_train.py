@@ -1433,8 +1433,11 @@ class Trainer():
 
         self.StylEx.G_opt.zero_grad()
 
+        n_generator = gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[S, G, D_aug])
+
         start_time = timeit.default_timer()
-        for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[S, G, D_aug]):
+        for idx,i in enumerate(n_generator):
+            print("1330: Loading batch with i value as:", idx)
             image_batch = next(self.loader).to(device)
 
             image_batch.requires_grad_()
@@ -1594,6 +1597,7 @@ class Trainer():
                     f.write(f'{self.steps},{fid}\n')
 
         self.steps += 1
+        print("Step incremented:", self.steps)
         self.av = None
 
     @torch.no_grad()
