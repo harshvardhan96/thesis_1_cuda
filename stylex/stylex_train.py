@@ -1659,7 +1659,7 @@ class Trainer():
 
         # regular
         from_encoder_string = ""
-        image_batch = next(self.loader).to(device)
+        image_batch = next(self.loader).to("cpu")
 
         if encoder_input:
             from_encoder_string = "from_encoder"
