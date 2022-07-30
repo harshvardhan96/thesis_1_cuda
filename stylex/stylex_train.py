@@ -946,15 +946,18 @@ class StylEx(nn.Module):
         self.encoder.to(device)
 
         self.S = StyleVectorizer(latent_dim, style_depth, lr_mul=lr_mlp)
+        self.S.to(device)
         self.G = Generator(image_size, latent_dim, network_capacity, transparent=transparent, attn_layers=attn_layers,
                            no_const=no_const, fmap_max=fmap_max)
+        self.G.to(device)
         self.D = DiscriminatorE(image_size, network_capacity, fq_layers=fq_layers, fq_dict_size=fq_dict_size,
                                 attn_layers=attn_layers, transparent=transparent, fmap_max=fmap_max)
-
+        self.D.to(device)
         self.SE = StyleVectorizer(latent_dim, style_depth, lr_mul=lr_mlp)
+        self.SE.to(device)
         self.GE = Generator(image_size, latent_dim, network_capacity, transparent=transparent, attn_layers=attn_layers,
                             no_const=no_const)
-
+        self.GE.to(device)
         self.D_cl = None
 
         # Is turned off by default
@@ -1302,13 +1305,13 @@ class Trainer():
         print("Converting models to device.")
         print("Device:", device)
         S = self.StylEx.S if not self.is_ddp else self.S_ddp
-        S.to(device)
+        # S.to(device)
         G = self.StylEx.G if not self.is_ddp else self.G_ddp
-        G.to(device)
+        # G.to(device)
         D = self.StylEx.D if not self.is_ddp else self.D_ddp
-        D.to(device)
+        # D.to(device)
         D_aug = self.StylEx.D_aug if not self.is_ddp else self.D_aug_ddp
-        D_aug.to(device)
+        # D_aug.to(device)
 
         print("1306: Before backprop")
         backwards = partial(loss_backwards, self.fp16)
