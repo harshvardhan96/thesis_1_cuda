@@ -1519,7 +1519,7 @@ class Trainer():
             # Our losses
             if not self.alternating_training or encoder_input:
                 # multiply losses by 2 since they are only calculated every other iteration if using alternating training
-                rec_loss = 2 * self.rec_scaling * reconstruction_loss(image_batch, generated_images,
+                rec_loss = 2 * self.rec_scaling * reconstruction_loss(image_batch, generated_images.to(device),
                                                                       self.StylEx.encoder(generated_images),
                                                                       encoder_output) / self.gradient_accumulate_every
                 kl_loss = 2 * self.kl_scaling * classifier_kl_loss(real_classified_logits,
