@@ -12,6 +12,9 @@ import torch.multiprocessing as mp
 import torch.distributed as dist
 import torch_xla
 import torch_xla.core.xla_model as xm
+import torch_xla.debug.metrics as met
+
+
 
 import numpy as np
 
@@ -264,3 +267,4 @@ if __name__ == '__main__':
     num_of_gpus = torch.cuda.device_count()
     print("Number of GPUS:",num_of_gpus)
     main()
+    print(met.metrics_report())
