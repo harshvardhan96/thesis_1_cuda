@@ -946,7 +946,6 @@ class StylEx(nn.Module):
         # self.encoder.to(device)
 
         self.S = StyleVectorizer(latent_dim, style_depth, lr_mul=lr_mlp)
-        self.S
         self.G = Generator(image_size, latent_dim, network_capacity, transparent=transparent, attn_layers=attn_layers,
                            no_const=no_const, fmap_max=fmap_max)
         self.D = DiscriminatorE(image_size, network_capacity, fq_layers=fq_layers, fq_dict_size=fq_dict_size,
