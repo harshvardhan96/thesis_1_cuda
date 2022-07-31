@@ -1651,9 +1651,9 @@ class Trainer():
         # latents and noise
 
         # latents = noise_list(num_rows ** 2, num_layers, latent_dim, device=self.rank)
-        latents = noise_list(num_rows ** 2, num_layers, latent_dim, device=device)
+        latents = noise_list(num_rows ** 2, num_layers, latent_dim, device="cpu")
         # n = image_noise(num_rows ** 2, image_size, device=self.rank)
-        n = image_noise(num_rows ** 2, image_size, device=device)
+        n = image_noise(num_rows ** 2, image_size, device="cpu")
 
         # regular
         from_encoder_string = ""
