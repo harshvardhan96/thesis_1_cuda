@@ -303,8 +303,8 @@ def loss_backwards(fp16, loss, optimizer, loss_id, **kwargs):
 
 
 def gradient_penalty(images, output, weight=10):
-    print("Images deivce:", images.device)
-    print("Output device:", output.device)
+    # print("Images deivce:", images.device)
+    # print("Output device:", output.device)
     batch_size = images.shape[0]
     gradients = torch_grad(outputs=output, inputs=images,
                            grad_outputs = torch.ones(output.size(), device=images.device),
@@ -341,8 +341,8 @@ def mixed_list(n, layers, latent_dim, device):
 
 
 def latent_to_w(style_vectorizer, latent_descr):
-    print("type of style vectorizer:", type(style_vectorizer))
-    print("type of latent desc:", type(latent_descr))
+    # print("type of style vectorizer:", type(style_vectorizer))
+    # print("type of latent desc:", type(latent_descr))
     return [(style_vectorizer(z), num_layers) for z, num_layers in latent_descr]
 
 
@@ -1221,7 +1221,7 @@ class Trainer():
         self.config_path.write_text(json.dumps(self.config()))
 
     def load_config(self):
-        print("Inside load config")
+        # print("Inside load config")
         config = self.config() if not self.config_path.exists() else json.loads(self.config_path.read_text())
         self.image_size = config['image_size']
         self.network_capacity = config['network_capacity']
@@ -1286,8 +1286,8 @@ class Trainer():
 
         batch_size = math.ceil(self.batch_size / self.world_size)
         
-        print("batch size:",batch_size)
-        print("Training started")
+        # print("batch size:",batch_size)
+        # print("Training started")
         image_size = self.StylEx.G.image_size
         latent_dim = self.StylEx.G.latent_dim
         num_layers = self.StylEx.G.num_layers
@@ -1300,8 +1300,8 @@ class Trainer():
         apply_path_penalty = not self.no_pl_reg and self.steps > 5000 and self.steps % 32 == 0
         apply_cl_reg_to_generated = self.steps > 20000
 
-        print("Converting models to device.")
-        print("Device:", device)
+        # print("Converting models to device.")
+        # print("Device:", device)
         S = self.StylEx.S if not self.is_ddp else self.S_ddp
         # S.to(device)
         G = self.StylEx.G if not self.is_ddp else self.G_ddp
@@ -1311,9 +1311,9 @@ class Trainer():
         D_aug = self.StylEx.D_aug if not self.is_ddp else self.D_aug_ddp
         # D_aug.to(device)
 
-        print("1306: Before backprop")
+        # print("1306: Before backprop")
         backwards = partial(loss_backwards, self.fp16)
-        print("1307: After backprop")
+        # print("1307: After backprop")
         # setup losses
 
         if not self.dual_contrast_loss:
@@ -1333,7 +1333,7 @@ class Trainer():
         if self.alternating_training:
             encoder_input = False
 
-        print("1327: Entering for loop.")
+        # print("1327: Entering for loop.")
 
         n = gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[D_aug, S, G])
         # print("Gradient epoch:", len(list(n)))
@@ -1341,12 +1341,12 @@ class Trainer():
 
         start_time = timeit.default_timer()
         for idx,i in enumerate(n):
-            print("1330: Loading batch with i value as:", idx)
+            # print("1330: Loading batch with i value as:", idx)
             discriminator_batch = next(self.loader).to(device)
 
-            print("1333: discriminator_batch size", discriminator_batch.shape)
+            # print("1333: discriminator_batch size", discriminator_batch.shape)
 
-            print("1332: Loaded batch succussfully")
+            # print("1332: Loaded batch succussfully")
             discriminator_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
@@ -1367,7 +1367,7 @@ class Trainer():
                 # # shape(4,5,514)
 
                 # Segmenation Model changes
-                print("1353: Before encoder output in discriminator")
+                # print("1353: Before encoder output in discriminator")
                 encoder_output = self.StylEx.encoder(encoder_batch)
                 real_classified_logits = self.classifier.get_segmentation_logits(encoder_batch.to(device))
                 # style_concat = [(torch.cat((encoder_output, real_classified_logits), dim=1),
@@ -1378,7 +1378,7 @@ class Trainer():
                 noise = image_noise(batch_size, image_size, device="cpu")
 
                 w_styles = styles_def_to_tensor(style)
-                print("1364: After converting encoder output to w_styles")
+                # print("1364: After converting encoder output to w_styles")
                 encoder_input = False
             else:
                 get_latents_fn = mixed_list if random() < self.mixed_prob else noise_list
@@ -1386,25 +1386,25 @@ class Trainer():
                 style = get_latents_fn(batch_size, num_layers, latent_dim, device="cpu")
                 # noise = image_noise(batch_size, image_size, device=self.rank)
                 noise = image_noise(batch_size, image_size, device="cpu")
-                print("line number 1356: device:", device)
+                # print("line number 1356: device:", device)
                 # print("style device:", style.device)
                 # print("noise device:", noise.device)
                 # print(type(style))
                 w_space = latent_to_w(S, style)
-                print("1362:executed latent_to_w")
+                # print("1362:executed latent_to_w")
                 w_styles = styles_def_to_tensor(w_space)
-                print("1364:executed styles_def_to_tensor")
+                # print("1364:executed styles_def_to_tensor")
                 if self.alternating_training:
                     encoder_input = True
 
             # (4,5,514),(4,64,64,1)
             generated_images = G(w_styles, noise)
 
-            print("Generated images device:", generated_images.device)
-
-            print("1378: Generated Images")
-
-            print("Remove batch from device:")
+            # print("Generated images device:", generated_images.device)
+            #
+            # print("1378: Generated Images")
+            #
+            # print("Remove batch from device:")
 
             discriminator_batch = discriminator_batch.to("cpu")
 
@@ -1433,9 +1433,9 @@ class Trainer():
             backwards(disc_loss, self.StylEx.D_opt, loss_id=1)
 
             total_disc_loss += divergence.detach().item() / self.gradient_accumulate_every
-            print("1393: Total disc loss", total_disc_loss)
+            # print("1393: Total disc loss", total_disc_loss)
 
-        print("Time taken to run for loop for Discrimnator:",timeit.default_timer() - start_time)
+        # print("Time taken to run for loop for Discrimnator:",timeit.default_timer() - start_time)
         self.d_loss = float(total_disc_loss)
         self.track(self.d_loss, 'D')
 
@@ -1452,7 +1452,7 @@ class Trainer():
 
         start_time = timeit.default_timer()
         for idx,i in enumerate(n_generator):
-            print("1330: Loading batch with i value as:", idx)
+            # print("1330: Loading batch with i value as:", idx)
             image_batch = next(self.loader).to(device)
 
             image_batch.requires_grad_()
@@ -1490,10 +1490,10 @@ class Trainer():
                 w_space = latent_to_w(S, style)
                 w_styles = styles_def_to_tensor(w_space)
 
-                print("1457: Train Generator first time completed")
+                # print("1457: Train Generator first time completed")
 
             generated_images = G(w_styles, noise)
-            print("1460: Generated images after training Generator")
+            # print("1460: Generated images after training Generator")
             # gen_image_classified_logits = self.classifier.classify_images(generated_images)
             gen_image_classified_logits = self.classifier.get_segmentation_logits(generated_images.to(device))
 
@@ -1560,11 +1560,11 @@ class Trainer():
                 self.g_loss = float(total_gen_loss)
 
             encoder_input = not encoder_input
-        print("Time taken to run for loop for generator:", timeit.default_timer() - start_time)
+        # print("Time taken to run for loop for generator:", timeit.default_timer() - start_time)
 
         # If writer exists, write losses
 
-        print("1158: If writer is true:", self.tb_writer)
+        # print("1158: If writer is true:", self.tb_writer)
         if exists(self.tb_writer):
             self.tb_writer.add_scalar('loss/G', self.g_loss, self.steps)
             self.tb_writer.add_scalar('loss/D', self.d_loss, self.steps)
@@ -1575,30 +1575,30 @@ class Trainer():
         self.track(self.total_rec_loss, 'Rec')
         self.track(self.total_kl_loss, 'KL')
 
-        print("1569: Running StylEx.G_opt.step")
+        # print("1569: Running StylEx.G_opt.step")
 
         self.StylEx.G_opt.step()
 
-        print("1569: Finished running StylEx.G_opt.step")
+        # print("1569: Finished running StylEx.G_opt.step")
         # calculate moving averages
 
-        print("Running first if at line 1576")
+        # print("Running first if at line 1576")
         if apply_path_penalty and not np.isnan(avg_pl_length):
             self.pl_mean = self.pl_length_ma.update_average(self.pl_mean, avg_pl_length)
             self.track(self.pl_mean, 'PL')
 
-        print("Completed running first if")
+        # print("Completed running first if")
 
-        print("Running second if")
+        # print("Running second if")
         if self.is_main and self.steps % 10 == 0 and self.steps > 20000:
             self.StylEx.EMA()
-        print("Completed running second if")
+        # print("Completed running second if")
 
-        print("Running third if")
+        # print("Running third if")
         if self.is_main and self.steps <= 25000 and self.steps % 1000 == 2:
             self.StylEx.reset_parameter_averaging()
 
-        print("Completed running third if")
+        # print("Completed running third if")
         # save from NaN errors
 
         if any(torch.isnan(l) for l in (total_gen_loss, total_disc_loss)):
@@ -1607,22 +1607,22 @@ class Trainer():
             raise NanException
 
         # periodically save results
-        print("Starting to save periodic results")
+        # print("Starting to save periodic results")
 
         if self.is_main:
 
-            # print("Saving checkpoint at line 1605.. Step:",self.steps)
-            # if self.steps % self.save_every == 0:
-            #     self.save(self.checkpoint_num)
-            # print("completed saving checkpoint")
+            print("Saving checkpoint at line 1605.. Step:",self.steps)
+            if self.steps % self.save_every == 0:
+                self.save(self.checkpoint_num)
+            print("completed saving checkpoint")
 
-            print("Evaluating at line 1610.. Step:", self.steps)
+            # print("Evaluating at line 1610.. Step:", self.steps)
             if self.steps % self.evaluate_every == 0 or (self.steps % 100 == 0 and self.steps < 2500):
                 self.evaluate(encoder_input=self.sample_from_encoder, num=floor(self.steps / self.evaluate_every), saveImages = False)
 
-            print("done evaluating at line 1613")
+            # print("done evaluating at line 1613")
 
-            print("Computing FID at line 1616...")
+            # print("Computing FID at line 1616...")
             if exists(self.calculate_fid_every) and self.steps % self.calculate_fid_every == 0 and self.steps != 0:
                 num_batches = math.ceil(self.calculate_fid_num_images / self.batch_size)
                 fid = self.calculate_fid(num_batches)
@@ -1631,7 +1631,7 @@ class Trainer():
                 with open(str(self.results_dir / self.name / f'fid_scores.txt'), 'a') as f:
                     f.write(f'{self.steps},{fid}\n')
 
-            print("Done computing FID at line 1625.")
+            # print("Done computing FID at line 1625.")
 
         self.steps += 1
         print("Step incremented:", self.steps)
