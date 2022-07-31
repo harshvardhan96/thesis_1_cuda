@@ -103,7 +103,7 @@ def train_from_folder(
         batch_size=64,
         gradient_accumulate_every=0,
         num_train_steps=150000,
-        learning_rate=0.001,
+        learning_rate=0.1,
         lr_mlp=0.1,
         ttur_mult=1.5,
         rel_disc_loss=False,
