@@ -1772,6 +1772,7 @@ class Trainer():
         if not exists(self.av):
             # z = noise(2000, latent_dim, device=self.rank)
             z = noise(2000, latent_dim, device=device)
+            print("Device of z:",z.device)
             samples = evaluate_in_chunks(batch_size, S, z).cpu().numpy()
             self.av = np.mean(samples, axis=0)
             self.av = np.expand_dims(self.av, axis=0)
