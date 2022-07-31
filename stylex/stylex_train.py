@@ -1675,7 +1675,7 @@ class Trainer():
 
         if saveImages:
 
-            generated_images = self.generate_truncated(self.StylEx.S, self.StylEx.G, latents, n, w=w,
+            generated_images = self.generate_truncated(self.StylEx.S, self.StylEx.G, latents, n, w=w.to(device),
                                                        trunc_psi=self.trunc_psi)
             torchvision.utils.save_image(torch.cat((image_batch, generated_images)),
                                          str(self.results_dir / self.name / f'{str(num)}-{from_encoder_string}.{ext}'),
