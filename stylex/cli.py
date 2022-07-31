@@ -100,8 +100,8 @@ def train_from_folder(
         network_capacity=16,  # 16
         fmap_max=512,
         transparent=False,
-        batch_size=32,
-        gradient_accumulate_every=2,
+        batch_size=128,
+        gradient_accumulate_every=0,
         num_train_steps=10,
         learning_rate=2e-4,
         lr_mlp=0.1,
