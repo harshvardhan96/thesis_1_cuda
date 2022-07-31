@@ -1697,11 +1697,11 @@ class Trainer():
                 repeat_idx[dim] = n_tile
                 a = a.repeat(*(repeat_idx))
                 order_index = torch.LongTensor(
-                    np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)])).to(device)
+                    np.concatenate([init_dim * np.arange(n_tile) + i for i in range(init_dim)])).to("cpu")
                 return torch.index_select(a, dim, order_index)
 
             # nn = noise(num_rows, latent_dim, device=self.rank)
-            nn = noise(num_rows, latent_dim, device=device)
+            nn = noise(num_rows, latent_dim, device="cpu")
             tmp1 = tile(nn, 0, num_rows)
             tmp2 = nn.repeat(num_rows, 1)
 
