@@ -1651,9 +1651,9 @@ class Trainer():
         # latents and noise
 
         # latents = noise_list(num_rows ** 2, num_layers, latent_dim, device=self.rank)
-        latents = noise_list(num_rows ** 2, num_layers, latent_dim, device="cpu")
+        latents = noise_list(num_rows ** 2, num_layers, latent_dim, device=device)
         # n = image_noise(num_rows ** 2, image_size, device=self.rank)
-        n = image_noise(num_rows ** 2, image_size, device="cpu")
+        n = image_noise(num_rows ** 2, image_size, device=device)
 
         # regular
         from_encoder_string = ""
@@ -1771,20 +1771,20 @@ class Trainer():
 
         if not exists(self.av):
             # z = noise(2000, latent_dim, device=self.rank)
-            z = noise(2000, latent_dim, device="cpu")
+            z = noise(2000, latent_dim, device=device)
             samples = evaluate_in_chunks(batch_size, S, z).cpu().numpy()
             self.av = np.mean(samples, axis=0)
             self.av = np.expand_dims(self.av, axis=0)
 
         av_torch = torch.from_numpy(self.av).to(device)
-        tensor = trunc_psi * (tensor.to(device) - av_torch) + av_torch
+        tensor = trunc_psi * (tensor - av_torch) + av_torch
         return tensor
 
     @torch.no_grad()
     def truncate_style_defs(self, w, trunc_psi=0.75):
         w_space = []
         for tensor, num_layers in w:
-            tensor = self.truncate_style(tensor, trunc_psi=trunc_psi)
+            tensor = self.truncate_style(tensor.to(device), trunc_psi=trunc_psi)
             w_space.append((tensor, num_layers))
         return w_space
 
