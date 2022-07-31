@@ -100,7 +100,7 @@ def train_from_folder(
         network_capacity=16,  # 16
         fmap_max=512,
         transparent=False,
-        batch_size=128,
+        batch_size=64,
         gradient_accumulate_every=0,
         num_train_steps=150000,
         learning_rate=2e-4,
