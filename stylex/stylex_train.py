@@ -1611,14 +1611,14 @@ class Trainer():
 
         if self.is_main:
 
-            print("Saving checkpoint at line 1605.. Step:",self.steps)
+            # print("Saving checkpoint at line 1605.. Step:",self.steps)
             if self.steps % self.save_every == 0:
                 self.save(self.checkpoint_num)
-            print("completed saving checkpoint")
+            # print("completed saving checkpoint")
 
             # print("Evaluating at line 1610.. Step:", self.steps)
             if self.steps % self.evaluate_every == 0 or (self.steps % 100 == 0 and self.steps < 2500):
-                self.evaluate(encoder_input=self.sample_from_encoder, num=floor(self.steps / self.evaluate_every), saveImages = False)
+                self.evaluate(encoder_input=self.sample_from_encoder, num=floor(self.steps / self.evaluate_every), saveImages = True)
 
             # print("done evaluating at line 1613")
 
