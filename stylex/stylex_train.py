@@ -1552,12 +1552,19 @@ class Trainer():
 
                 total_gen_loss += loss.detach().item() / self.gradient_accumulate_every
                 total_rec_loss += rec_loss.detach().item()
+                print("Total rec loss :", total_rec_loss)
                 total_kl_loss += kl_loss.detach().item()
+                print("Total KL loss :", total_kl_loss)
 
                 self.g_loss = float(total_gen_loss)
                 self.total_rec_loss = float(total_rec_loss)
 
+                print("Total Float rec loss :", self.total_rec_loss)
+
+
                 self.total_kl_loss = float(total_kl_loss)
+
+                print("Total Float KL loss :", self.total_kl_loss)
             else:
                 backwards(gen_loss, self.StylEx.G_opt, loss_id=2)
 
