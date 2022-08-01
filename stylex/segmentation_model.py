@@ -51,7 +51,7 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
     print(os.getcwd())
     model_fname = './trained_classifiers/deeplab_model.pth'
     # dataset_root = 'ffhq_aging{}x{}'.format(resolution,resolution)
-    dataset_root = '../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/'
+    dataset_root = '../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized/'
     assert os.path.isdir(dataset_root)
     dataset = CelebASegmentation(dataset_root, crop_size=513)
 
