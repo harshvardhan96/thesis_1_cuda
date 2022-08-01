@@ -26,6 +26,8 @@ import torch.nn.functional as F
 from torch.autograd import grad as torch_grad
 from torch.utils.data.distributed import DistributedSampler
 from torch.nn.parallel import DistributedDataParallel as DDP
+
+
 import torch_xla
 import torch_xla.core.xla_model as xm
 
@@ -1519,8 +1521,12 @@ class Trainer():
                 rec_loss = 2 * self.rec_scaling * reconstruction_loss(image_batch, generated_images.to(device),
                                                                       self.StylEx.encoder(generated_images),
                                                                       encoder_output) / self.gradient_accumulate_every
+
+                print("Rec_Loss: ", rec_loss)
                 kl_loss = 2 * self.kl_scaling * classifier_kl_loss(real_classified_logits,
                                                                    gen_image_classified_logits) / self.gradient_accumulate_every
+
+                print("KL_Loss: ", kl_loss)
 
             # Original loss
             loss = G_loss_fn(fake_output_loss, real_output)
@@ -1550,6 +1556,7 @@ class Trainer():
 
                 self.g_loss = float(total_gen_loss)
                 self.total_rec_loss = float(total_rec_loss)
+
                 self.total_kl_loss = float(total_kl_loss)
             else:
                 backwards(gen_loss, self.StylEx.G_opt, loss_id=2)
@@ -1569,6 +1576,7 @@ class Trainer():
             self.tb_writer.add_scalar('loss/D', self.d_loss, self.steps)
             self.tb_writer.add_scalar('loss/rec', self.total_rec_loss, self.steps)
             self.tb_writer.add_scalar('loss/kl', self.total_kl_loss, self.steps)
+
 
         self.track(self.g_loss, 'G')
         self.track(self.total_rec_loss, 'Rec')

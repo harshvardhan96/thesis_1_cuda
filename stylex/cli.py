@@ -109,7 +109,7 @@ def train_from_folder(
         rel_disc_loss=False,
         num_workers=2,  # None
         save_every=500,  # 1000
-        evaluate_every=50,  # 1000
+        evaluate_every=1,  # 1000
         generate=False,
         num_generate=1,
         generate_interpolation=False,
