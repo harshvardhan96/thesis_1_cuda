@@ -1433,6 +1433,7 @@ class Trainer():
                 # print("1362:executed latent_to_w")
                 w_styles = styles_def_to_tensor(w_space)
                 # print("1364:executed styles_def_to_tensor")
+
                 if self.alternating_training:
                     encoder_input = True
 
