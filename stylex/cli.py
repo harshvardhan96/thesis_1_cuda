@@ -95,7 +95,7 @@ def train_from_folder(
         name='Faces-Resnet-64',  # Name of the experiment.
         new=True,
         load_from=-1,
-        image_size=256,
+        image_size=64,
         # image_size=64,
         network_capacity=16,  # 16
         fmap_max=512,
