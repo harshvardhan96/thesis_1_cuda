@@ -1378,7 +1378,8 @@ class Trainer():
         start_time = timeit.default_timer()
         for idx,i in enumerate(n):
             # print("1330: Loading batch with i value as:", idx)
-            discriminator_batch = next(self.loader).to(device)
+            discriminator_batch = next(self.loader)
+            discriminator_batch = discriminator_batch['data'].to(device)
 
             # print("1333: discriminator_batch size", discriminator_batch.shape)
 
