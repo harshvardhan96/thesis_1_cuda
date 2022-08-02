@@ -1565,6 +1565,9 @@ class Trainer():
                 kl_loss = 2 * self.kl_scaling * classifier_kl_loss(real_classified_logits,
                                                                    gen_image_classified_logits) / self.gradient_accumulate_every
 
+                print("Rec Loss:", rec_loss)
+                print("KL Loss:", kl_loss)
+
             # Original loss
             loss = G_loss_fn(fake_output_loss, real_output)
             gen_loss = loss
