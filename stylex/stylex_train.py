@@ -1557,7 +1557,9 @@ class Trainer():
                     fake_output_loss, _ = fake_output_loss.topk(k=k, largest=False)
 
             # Our losses
+            print("Just before computing losses...")
             if not self.alternating_training or encoder_input:
+                print("Computing losses....")
                 # multiply losses by 2 since they are only calculated every other iteration if using alternating training
                 rec_loss = 2 * self.rec_scaling * reconstruction_loss(image_batch, generated_images.to(device),
                                                                       self.StylEx.encoder(generated_images),
