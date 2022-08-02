@@ -1534,7 +1534,7 @@ class Trainer():
                 # print("1457: Train Generator first time completed")
 
             generated_images = G(w_styles, noise)
-            generated_images = generated_images['data']
+            generated_images = generated_images
             # print("1460: Generated images after training Generator")
             # gen_image_classified_logits = self.classifier.classify_images(generated_images)
             gen_image_classified_logits = self.classifier.get_segmentation_logits(generated_images.to(device))
