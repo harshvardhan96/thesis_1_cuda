@@ -1284,7 +1284,7 @@ class Trainer():
             dataloader = data.DataLoader(self.dataset, batch_size=self.batch_size, sampler=sampler)
 
         if dataset_name == "SegFace2Class":
-            print(f"Calling SegFac2Class with batchsize {self.batch_size} and num_workers {num_workers}:")
+            print(f"Calling SegFac2Class with batchsize {self.batch_size} and num_workers {self.num_workers}:")
 
             self.dataset = Face_dataset(data_dir=data_folder,
                                    images_folder=images_folder,
@@ -1294,7 +1294,7 @@ class Trainer():
             dataloader = DataLoader(self.dataset,
                                     batch_size=self.batch_size,
                                     shuffle=False,
-                                    num_workers=num_workers,
+                                    num_workers=self.num_workers,
                                     )
 
 
