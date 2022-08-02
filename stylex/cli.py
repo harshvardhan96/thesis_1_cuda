@@ -78,7 +78,7 @@ def run_training(rank, world_size, model_args, data, load_from, new, num_train_s
         retry_call(model.train, tries=3, exceptions=NanException)
         progress_bar.n = model.steps
         progress_bar.refresh()
-        if is_main and model.steps % 50 == 0:
+        if is_main and model.steps % 1 == 0:
             model.print_log()
 
     model.save(model.checkpoint_num)
@@ -95,13 +95,13 @@ def train_from_folder(
         name='Faces-Resnet-64',  # Name of the experiment.
         new=True,
         load_from=-1,
-        image_size=64,
+        image_size=16,
         # image_size=64,
         network_capacity=16,  # 16
         fmap_max=512,
         transparent=False,
         batch_size=64,
-        gradient_accumulate_every=1,
+        gradient_accumulate_every=4,
         num_train_steps=150000,
         learning_rate=2e-4,
         lr_mlp=0.1,
@@ -109,7 +109,7 @@ def train_from_folder(
         rel_disc_loss=False,
         num_workers=8,  # None
         save_every=500,  # 1000
-        evaluate_every=50,  # 1000
+        evaluate_every=100,  # 1000
         generate=False,
         num_generate=1,
         generate_interpolation=False,

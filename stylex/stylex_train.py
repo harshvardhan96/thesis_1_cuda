@@ -1389,7 +1389,7 @@ class Trainer():
             if not self.alternating_training or encoder_input:
                 encoder_batch = next(self.loader)
                 encoder_batch = encoder_batch['data']
-                print("Encoder batch shape:", encoder_batch.shape)
+                # print("Encoder batch shape:", encoder_batch.shape)
                 encoder_batch.requires_grad_()
 
                 # Original Classifier
@@ -1495,7 +1495,7 @@ class Trainer():
             image_batch = next(self.loader)
             image_batch = image_batch['data'].to(device)
 
-            print("Print image batch size:", image_batch.shape)
+            # print("Print image batch size:", image_batch.shape)
             image_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
