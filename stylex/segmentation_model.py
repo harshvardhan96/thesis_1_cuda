@@ -22,6 +22,7 @@ from torch.utils.data import DataLoader
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
 import pandas as pd
+import torch.utils.data as data
 
 
 c_pallet = np.array([[[0, 0, 0],
@@ -122,7 +123,7 @@ class SegmentationModel():
         return self.model(images)['out']
 
 
-class Face_dataset(Dataset):
+class Face_dataset(data.Dataset):
     def __init__(self,
                  data_dir: str,
                  images_folder: str,
