@@ -152,7 +152,7 @@ def train_from_folder(
 
         # This shouldn't ever be changed since we're working with
         # binary classification.
-        num_classes=19,
+        num_classes = 2,
 
         # If unspecified, use the Discriminator as an encoder (like the authors did).
         # This is the way to go if we want to be close to the original paper.
@@ -174,7 +174,7 @@ def train_from_folder(
         alternating_training=True,
 
         # If dataset_name='MNIST' automatically loads and rebalances a 1 vs all MNIST dataset.
-        dataset_name=None,
+        dataset_name="SegFace2Class",
 
         tensorboard_dir="tb_logs_stylex"  # Put to None for not logging
 ):

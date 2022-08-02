@@ -44,6 +44,11 @@ from PIL import Image
 from pathlib import Path
 import timeit
 
+from torch.utils.data import DataLoader
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+import pandas as pd
+
 try:
     from apex import amp
 
@@ -58,7 +63,7 @@ import aim
 # Classifier
 from mobilenet_classifier import MobileNet
 from resnet_classifier import ResNet
-from segmentation_model import SegmentationModel
+from segmentation_model import SegmentationModel, Face_dataset
 
 # Encoders for debugging or additional testing
 import debug_encoders
@@ -71,6 +76,22 @@ import debug_encoders
 NUM_CORES = multiprocessing.cpu_count()
 EXTS = ['jpg', 'jpeg', 'png']
 device = xm.xla_device()
+
+images_folder = "resized"
+masks_folder = "seg"
+data_folder = "../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px"
+train_csv = "./trained_classifiers/train.csv"
+valid_csv = "./trained_classifiers/valid.csv"
+
+val_transform = A.Compose(
+    [
+        A.Resize(64, 64),
+        # A.ShiftScaleRotate(shift_limit=0.2, scale_limit=0.2, rotate_limit=30, p=0.5),
+        # A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.5),
+        # A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ToTensorV2(),
+    ])
 
 # helper classes
 
@@ -1262,6 +1283,22 @@ class Trainer():
 
             dataloader = data.DataLoader(self.dataset, batch_size=self.batch_size, sampler=sampler)
 
+        if dataset_name == "SegFace2Class":
+            print(f"Calling SegFac2Class with batchsize {self.batch_size} and num_workers {num_workers}:")
+
+            self.dataset = Face_dataset(data_dir=data_folder,
+                                   images_folder=images_folder,
+                                   csv_file = valid_csv,
+                                   augmentations=val_transform)
+
+            dataloader = DataLoader(self.dataset,
+                                    batch_size=self.batch_size,
+                                    shuffle=False,
+                                    num_workers=num_workers,
+                                    )
+
+
+
         self.loader = cycle(dataloader)
 
         # auto set augmentation prob for user if dataset is detected to be low
@@ -1350,6 +1387,8 @@ class Trainer():
 
             if not self.alternating_training or encoder_input:
                 encoder_batch = next(self.loader)
+                encoder_batch = encoder_batch['data']
+                print("Encoder batch shape:", encoder_batch.shape)
                 encoder_batch.requires_grad_()
 
                 # Original Classifier
@@ -1453,7 +1492,9 @@ class Trainer():
         for idx,i in enumerate(n_generator):
             # print("1330: Loading batch with i value as:", idx)
             image_batch = next(self.loader).to(device)
+            image_batch = image_batch['data']
 
+            print("Print image batch size:", image_batch.shape)
             image_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
@@ -1492,6 +1533,7 @@ class Trainer():
                 # print("1457: Train Generator first time completed")
 
             generated_images = G(w_styles, noise)
+            generated_images = generated_images['data']
             # print("1460: Generated images after training Generator")
             # gen_image_classified_logits = self.classifier.classify_images(generated_images)
             gen_image_classified_logits = self.classifier.get_segmentation_logits(generated_images.to(device))
