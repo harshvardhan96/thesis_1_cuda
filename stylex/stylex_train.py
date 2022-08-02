@@ -1558,6 +1558,9 @@ class Trainer():
 
             # Our losses
             print("Just before computing losses...")
+            print("Alternating:", self.alternating_training )
+            print("PRinting encoder_input...:", encoder_input)
+            print("If condition printing...:", not self.alternating_training or encoder_input)
             if not self.alternating_training or encoder_input:
                 print("Computing losses....")
                 # multiply losses by 2 since they are only calculated every other iteration if using alternating training
