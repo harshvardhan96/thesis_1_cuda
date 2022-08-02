@@ -1492,8 +1492,8 @@ class Trainer():
         start_time = timeit.default_timer()
         for idx,i in enumerate(n_generator):
             # print("1330: Loading batch with i value as:", idx)
-            image_batch = next(self.loader).to(device)
-            image_batch = image_batch['data']
+            image_batch = next(self.loader)
+            image_batch = image_batch['data'].to(device)
 
             print("Print image batch size:", image_batch.shape)
             image_batch.requires_grad_()
