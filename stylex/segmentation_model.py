@@ -56,7 +56,7 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
     # assert torch.cuda.is_available()
     torch.backends.cudnn.benchmark = True
     print(os.getcwd())
-    model_fname = './trained_classifiers/model.ckpt'
+    model_fname = '/home/harsh/thesis_1_cuda/stylex/trained_classifiers/model.ckpt'
     # dataset_root = 'ffhq_aging{}x{}'.format(resolution,resolution)
     dataset_root = '../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized/'
     assert os.path.isdir(dataset_root)
@@ -99,11 +99,12 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
     # model.load_state_dict(state_dict)
 
     model = models.segmentation.deeplabv3_resnet50(pretrained=False, num_classes=2)
+    print("model path:", model_fname)
     checkpoint = torch.load(model_fname, map_location=torch.device("cpu"))
     state_dict = {}
     for key, val in checkpoint['state_dict'].items():
         key = key.replace("model.", "")
-    state_dict[key] = val
+        state_dict[key] = val
     print("Loading checkpoint into SegFace2:")
     model.load_state_dict(state_dict)
     model = model.to(device)
