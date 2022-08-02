@@ -99,13 +99,14 @@ def load_segmentation_model(model_name: str, cuda_rank: int, output_size: int = 
     # model.load_state_dict(state_dict)
 
     model = models.segmentation.deeplabv3_resnet50(pretrained=False, num_classes=2)
-    model = model.to(device)
     checkpoint = torch.load(model_fname, map_location=torch.device("cpu"))
     state_dict = {}
     for key, val in checkpoint['state_dict'].items():
         key = key.replace("model.", "")
     state_dict[key] = val
+    print("Loading checkpoint into SegFace2:")
     model.load_state_dict(state_dict)
+    model = model.to(device)
     model.eval()
 
     return model
