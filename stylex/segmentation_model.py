@@ -161,14 +161,14 @@ class Face_dataset(data.Dataset):
         img = self.images_list[item].strip()
         img_path = os.path.join(self.data_dir, self.train_images_folder, img)
         img = np.asarray(Image.open(img_path))
-        label_mask = self.labels_list[item].strip()
-        label_mask_path = os.path.join(self.data_dir, self.label_mask_folder, label_mask)
+        # label_mask = self.labels_list[item].strip()
+        # label_mask_path = os.path.join(self.data_dir, self.label_mask_folder, label_mask)
 
-        label_mask_npz = np.load(label_mask_path)
-        label_mask_np = label_mask_npz[list(label_mask_npz.keys())[0]][:, :, 0]
-        label_mask_np[label_mask_np == 204] = 1
+        # label_mask_npz = np.load(label_mask_path)
+        # label_mask_np = label_mask_npz[list(label_mask_npz.keys())[0]][:, :, 0]
+        # label_mask_np[label_mask_np == 204] = 1
         if self.augmentations is not None:
-            augmented = self.augmentations(image=img, mask=label_mask_np)
+            augmented = self.augmentations(image=img)
             img = augmented['image']
             label_mask_np = augmented['mask']
             return {'data': img,
@@ -176,9 +176,9 @@ class Face_dataset(data.Dataset):
                     }
         else:
             return {'data': torch.from_numpy(img),
-                    'label': torch.from_numpy(label_mask_np).long(),
+                    # 'label': torch.from_numpy(label_mask_np).long(),
                     'img_path': img_path,
-                    'label_mask_path': label_mask_path
+                    # 'label_mask_path': label_mask_path
                     }
 
     def __len__(self) -> int:
