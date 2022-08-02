@@ -12,7 +12,7 @@ import torch_xla
 import torch_xla.core.xla_model as xm
 
 import deeplab
-from data_loader import CelebASegmentation, Dataset, Face_dataset
+from data_loader import CelebASegmentation, Face_dataset
 from utils import download_file
 import cv2
 from gray2color import gray2color
