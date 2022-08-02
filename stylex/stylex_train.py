@@ -48,12 +48,17 @@ except:
 
 import aim
 
+from torch.utils.data import DataLoader
+import albumentations as A
+from albumentations.pytorch import ToTensorV2
+import pandas as pd
+
 assert torch.cuda.is_available(), 'You need to have an Nvidia GPU with CUDA installed.'
 
 # Classifier
 from mobilenet_classifier import MobileNet
 from resnet_classifier import ResNet
-from segmentation_model import SegmentationModel
+from segmentation_model import SegmentationModel, Face_dataset
 
 # Encoders for debugging or additional testing
 import debug_encoders
@@ -62,6 +67,23 @@ import debug_encoders
 
 NUM_CORES = multiprocessing.cpu_count()
 EXTS = ['jpg', 'jpeg', 'png']
+
+images_folder = "resized"
+masks_folder = "seg"
+data_folder = "../data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px"
+train_csv = "./trained_classifiers/train.csv"
+valid_csv = "./trained_classifiers/valid.csv"
+
+
+val_transform = A.Compose(
+    [
+        A.Resize(64, 64),
+        # A.ShiftScaleRotate(shift_limit=0.2, scale_limit=0.2, rotate_limit=30, p=0.5),
+        # A.RGBShift(r_shift_limit=25, g_shift_limit=25, b_shift_limit=25, p=0.5),
+        # A.RandomBrightnessContrast(brightness_limit=0.3, contrast_limit=0.3, p=0.5),
+        A.Normalize(mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)),
+        ToTensorV2(),
+    ])
 
 
 # helper classes
@@ -1245,6 +1267,21 @@ class Trainer():
             sampler = torch.utils.data.WeightedRandomSampler(weights, len(weights))
 
             dataloader = data.DataLoader(self.dataset, batch_size=self.batch_size, sampler=sampler)
+            
+            
+        if dataset_name == "SegFace2Class":
+            print(f"Calling SegFac2Class with batchsize {self.batch_size} and num_workers {self.num_workers}:")
+
+            self.dataset = Face_dataset(data_dir=data_folder,
+                                   images_folder=images_folder,
+                                   csv_file = valid_csv,
+                                   augmentations=val_transform)
+
+            dataloader = DataLoader(self.dataset,
+                                    batch_size=self.batch_size,
+                                    shuffle=False,
+                                    num_workers=self.num_workers,
+                                    )
 
         self.loader = cycle(dataloader)
 
@@ -1310,11 +1347,13 @@ class Trainer():
             encoder_input = False
 
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[D_aug, S, G]):
-            discriminator_batch = next(self.loader).cuda(self.rank)
+            discriminator_batch = next(self.loader)
+            discriminator_batch = discriminator_batch['data'].cuda(self.rank)
             discriminator_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
-                encoder_batch = next(self.loader).cuda(self.rank)
+                encoder_batch = next(self.loader)
+                encoder_batch = encoder_batch['data'].cuda(self.rank)
                 encoder_batch.requires_grad_()
 
                 # Original Classifier
@@ -1395,8 +1434,8 @@ class Trainer():
         self.StylEx.G_opt.zero_grad()
 
         for i in gradient_accumulate_contexts(self.gradient_accumulate_every, self.is_ddp, ddps=[S, G, D_aug]):
-            image_batch = next(self.loader).cuda(self.rank)
-
+            image_batch = next(self.loader)
+            image_batch = image_batch['data'].cuda(self.rank)
             image_batch.requires_grad_()
 
             if not self.alternating_training or encoder_input:
@@ -1413,8 +1452,8 @@ class Trainer():
 
                 # Segmentation Generator training code
 
-                encoder_output = self.StylEx.encoder(encoder_batch)
-                real_classified_logits = self.classifier.get_segmentation_logits(encoder_batch)
+                encoder_output = self.StylEx.encoder(image_batch)
+                real_classified_logits = self.classifier.get_segmentation_logits(image_batch)
                 # style_concat = [(torch.cat((encoder_output, real_classified_logits), dim=1),
                 #           self.StylEx.G.num_layers)]  # Has to be bracketed because expects a noise mix
                 style = [(encoder_output, self.StylEx.G.num_layers)]
@@ -1568,7 +1607,8 @@ class Trainer():
 
         # regular
         from_encoder_string = ""
-        image_batch = next(self.loader).cuda(self.rank)
+        image_batch = next(self.loader)
+        image_batch = image_batch['data'].cuda(self.rank)
 
         if encoder_input:
             from_encoder_string = "from_encoder"

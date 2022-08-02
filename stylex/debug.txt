@@ -1,0 +1,113 @@
+jovyan@jupyter-hc002:~/thesis/thesis_experiment_1/stylex$ NCCL_DEBUG=INFO python cli.py
+2022-07-27 22:18:59.881986: I tensorflow/core/util/util.cc:169] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+/home/jovyan/.local/lib/python3.9/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and will be removed in 0.15, please use 'weights' instead.
+  warnings.warn(
+/home/jovyan/.local/lib/python3.9/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and will be removed in 0.15. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Loading model from: /home/jovyan/.local/lib/python3.9/site-packages/lpips/weights/v0.1/alex.pth
+Number of GPUS: 2
+2022-07-27 22:19:10.315173: I tensorflow/core/util/util.cc:169] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+2022-07-27 22:19:10.317535: I tensorflow/core/util/util.cc:169] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+/home/jovyan/.local/lib/python3.9/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and will be removed in 0.15, please use 'weights' instead.
+  warnings.warn(
+/home/jovyan/.local/lib/python3.9/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and will be removed in 0.15. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Setting up [LPIPS] perceptual loss: trunk [alex], v[0.1], spatial [off]
+/home/jovyan/.local/lib/python3.9/site-packages/torchvision/models/_utils.py:208: UserWarning: The parameter 'pretrained' is deprecated since 0.13 and will be removed in 0.15, please use 'weights' instead.
+  warnings.warn(
+/home/jovyan/.local/lib/python3.9/site-packages/torchvision/models/_utils.py:223: UserWarning: Arguments other than a weight enum or `None` for 'weights' are deprecated since 0.13 and will be removed in 0.15. The current behavior is equivalent to passing `weights=AlexNet_Weights.IMAGENET1K_V1`. You can also use `weights=AlexNet_Weights.DEFAULT` to get the most up-to-date weights.
+  warnings.warn(msg)
+Loading model from: /home/jovyan/.local/lib/python3.9/site-packages/lpips/weights/v0.1/alex.pth
+Loading model from: /home/jovyan/.local/lib/python3.9/site-packages/lpips/weights/v0.1/alex.pth
+1/2 process initialized.
+2/2 process initialized.
+/home/jovyan/thesis/thesis_experiment_1/stylex
+/home/jovyan/thesis/thesis_experiment_1/stylex
+Faces-Resnet-64</home/jovyan/thesis/thesis_experiment_1/data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/>:   0%| | 0/150000 [00:00<?, ?itjupyter-hc002:1746:1746 [0] NCCL INFO Bootstrap : Using eth0:10.131.16.43<0>
+jupyter-hc002:1746:1746 [0] NCCL INFO NET/Plugin : No plugin found (libnccl-net.so), using internal implementation
+
+jupyter-hc002:1746:1746 [0] misc/ibvwrap.cc:63 NCCL WARN Failed to open libibverbs.so[.1]
+jupyter-hc002:1746:1746 [0] NCCL INFO NET/Socket : Using [0]eth0:10.131.16.43<0>
+jupyter-hc002:1746:1746 [0] NCCL INFO Using network Socket
+NCCL version 2.10.3+cuda11.6
+Faces-Resnet-64</home/jovyan/thesis/thesis_experiment_1/data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/>:   0%| | 0/150000 [00:00<?, ?itjupyter-hc002:1747:1747 [1] NCCL INFO Bootstrap : Using eth0:10.131.16.43<0>
+jupyter-hc002:1747:1747 [1] NCCL INFO NET/Plugin : No plugin found (libnccl-net.so), using internal implementation
+
+jupyter-hc002:1747:1747 [1] misc/ibvwrap.cc:63 NCCL WARN Failed to open libibverbs.so[.1]
+jupyter-hc002:1747:1747 [1] NCCL INFO NET/Socket : Using [0]eth0:10.131.16.43<0>
+jupyter-hc002:1747:1747 [1] NCCL INFO Using network Socket
+jupyter-hc002:1746:2011 [0] NCCL INFO Channel 00/02 :    0   1
+jupyter-hc002:1746:2011 [0] NCCL INFO Channel 01/02 :    0   1
+jupyter-hc002:1746:2011 [0] NCCL INFO Trees [0] 1/-1/-1->0->-1 [1] 1/-1/-1->0->-1
+jupyter-hc002:1747:2014 [1] NCCL INFO Trees [0] -1/-1/-1->1->0 [1] -1/-1/-1->1->0
+jupyter-hc002:1746:2011 [0] NCCL INFO Setting affinity for GPU 1 to 5555,55555555
+jupyter-hc002:1747:2014 [1] NCCL INFO Setting affinity for GPU 3 to aaaa,aaaaaaaa
+
+jupyter-hc002:1747:2014 [1] include/shm.h:28 NCCL WARN Call to posix_fallocate failed : No space left on device
+jupyter-hc002:1747:2014 [1] NCCL INFO include/shm.h:41 -> 2
+
+jupyter-hc002:1747:2014 [1] include/shm.h:48 NCCL WARN Error while creating shared memory segment nccl-shm-recv-b694b2c47794376c-0-0-1 (size 9637888)
+jupyter-hc002:1747:2014 [1] NCCL INFO transport/shm.cc:100 -> 2
+jupyter-hc002:1747:2014 [1] NCCL INFO transport.cc:34 -> 2
+jupyter-hc002:1747:2014 [1] NCCL INFO transport.cc:84 -> 2
+jupyter-hc002:1747:2014 [1] NCCL INFO init.cc:778 -> 2
+jupyter-hc002:1747:2014 [1] NCCL INFO init.cc:904 -> 2
+jupyter-hc002:1747:2014 [1] NCCL INFO group.cc:72 -> 2 [Async thread]
+
+jupyter-hc002:1746:2011 [0] include/shm.h:28 NCCL WARN Call to posix_fallocate failed : No space left on device
+jupyter-hc002:1746:2011 [0] NCCL INFO include/shm.h:41 -> 2
+
+jupyter-hc002:1746:2011 [0] include/shm.h:48 NCCL WARN Error while creating shared memory segment nccl-shm-recv-e72677e94a9a8fab-0-1-0 (size 9637888)
+jupyter-hc002:1746:2011 [0] NCCL INFO transport/shm.cc:100 -> 2
+jupyter-hc002:1746:2011 [0] NCCL INFO transport.cc:34 -> 2
+jupyter-hc002:1746:2011 [0] NCCL INFO transport.cc:84 -> 2
+jupyter-hc002:1746:2011 [0] NCCL INFO init.cc:778 -> 2
+jupyter-hc002:1746:2011 [0] NCCL INFO init.cc:904 -> 2
+jupyter-hc002:1746:2011 [0] NCCL INFO group.cc:72 -> 2 [Async thread]
+Faces-Resnet-64</home/jovyan/thesis/thesis_experiment_1/data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/>:   0%| | 0/150000 [00:03<?, ?it
+Faces-Resnet-64</home/jovyan/thesis/thesis_experiment_1/data/Kaggle_FFHQ_Resized_256px/flickrfaceshq-dataset-nvidia-resized-256px/resized_sub/>:   0%| | 0/150000 [00:06<?, ?it
+Traceback (most recent call last):
+  File "/home/jovyan/thesis/thesis_experiment_1/stylex/cli.py", line 264, in <module>
+    main()
+  File "/home/jovyan/thesis/thesis_experiment_1/stylex/cli.py", line 258, in main
+    fire.Fire(train_from_folder)
+  File "/home/jovyan/.local/lib/python3.9/site-packages/fire/core.py", line 141, in Fire
+    component_trace = _Fire(component, args, parsed_flag_args, context, name)
+  File "/home/jovyan/.local/lib/python3.9/site-packages/fire/core.py", line 466, in _Fire
+    component, remaining_args = _CallAndUpdateTrace(
+  File "/home/jovyan/.local/lib/python3.9/site-packages/fire/core.py", line 681, in _CallAndUpdateTrace
+    component = fn(*varargs, **kwargs)
+  File "/home/jovyan/thesis/thesis_experiment_1/stylex/cli.py", line 251, in train_from_folder
+    mp.spawn(run_training,
+  File "/home/jovyan/.local/lib/python3.9/site-packages/torch/multiprocessing/spawn.py", line 240, in spawn
+    return start_processes(fn, args, nprocs, join, daemon, start_method='spawn')
+  File "/home/jovyan/.local/lib/python3.9/site-packages/torch/multiprocessing/spawn.py", line 198, in start_processes
+    while not context.join():
+  File "/home/jovyan/.local/lib/python3.9/site-packages/torch/multiprocessing/spawn.py", line 160, in join
+    raise ProcessRaisedException(msg, error_index, failed_process.pid)
+torch.multiprocessing.spawn.ProcessRaisedException: 
+
+-- Process 0 terminated with the following error:
+Traceback (most recent call last):
+  File "/home/jovyan/.local/lib/python3.9/site-packages/torch/multiprocessing/spawn.py", line 69, in _wrap
+    fn(i, *args)
+  File "/home/jovyan/thesis/thesis_experiment_1/stylex/cli.py", line 73, in run_training
+    retry_call(model.train, tries=3, exceptions=NanException)
+  File "/home/jovyan/.local/lib/python3.9/site-packages/retry/api.py", line 101, in retry_call
+    return __retry_internal(partial(f, *args, **kwargs), exceptions, tries, delay, max_delay, backoff, jitter, logger)
+  File "/home/jovyan/.local/lib/python3.9/site-packages/retry/api.py", line 33, in __retry_internal
+    return f()
+  File "/home/jovyan/thesis/thesis_experiment_1/stylex/stylex_train.py", line 1261, in train
+    self.init_StylEx()
+  File "/home/jovyan/thesis/thesis_experiment_1/stylex/stylex_train.py", line 1197, in init_StylEx
+    self.S_ddp = DDP(self.StylEx.S, **ddp_kwargs)
+  File "/home/jovyan/.local/lib/python3.9/site-packages/torch/nn/parallel/distributed.py", line 646, in __init__
+    _verify_param_shape_across_processes(self.process_group, parameters)
+  File "/home/jovyan/.local/lib/python3.9/site-packages/torch/distributed/utils.py", line 89, in _verify_param_shape_across_processes
+    return dist._verify_params_across_processes(process_group, tensors, logger)
+RuntimeError: NCCL error in: ../torch/csrc/distributed/c10d/ProcessGroupNCCL.cpp:1191, unhandled system error, NCCL version 2.10.3
+ncclSystemError: System call (e.g. socket, malloc) or external library call failed or device error. It can be also caused by unexpected exit of a remote peer, you can check NCCL warnings for failure reason and see if there is connection closure by a peer.
+
+jovyan@jupyter-hc002:~/thesis/thesis_experiment_1/stylex$ 
