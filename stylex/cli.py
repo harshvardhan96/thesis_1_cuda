@@ -95,12 +95,12 @@ def train_from_folder(
         name='Faces-Resnet-64',  # Name of the experiment.
         new=True,
         load_from=-1,
-        image_size=16,
+        image_size=64,
         # image_size=64,
         network_capacity=16,  # 16
         fmap_max=512,
         transparent=False,
-        batch_size=64,
+        batch_size=16,
         gradient_accumulate_every=4,
         num_train_steps=150000,
         learning_rate=2e-4,
