@@ -170,7 +170,7 @@ class Face_dataset(data.Dataset):
         if self.augmentations is not None:
             augmented = self.augmentations(image=img)
             img = augmented['image']
-            label_mask_np = augmented['mask']
+            # label_mask_np = augmented['mask']
             return {'data': img,
                     'img_path': img_path,
                     }
