@@ -1561,6 +1561,7 @@ class Trainer():
             print("Alternating:", self.alternating_training )
             print("PRinting encoder_input...:", encoder_input)
             print("If condition printing...:", not self.alternating_training or encoder_input)
+
             if not self.alternating_training or encoder_input:
                 print("Computing losses....")
                 # multiply losses by 2 since they are only calculated every other iteration if using alternating training
@@ -1609,7 +1610,9 @@ class Trainer():
 
                 self.g_loss = float(total_gen_loss)
 
+            print("Printing encoder input befor changing value:", encoder_input)
             encoder_input = not encoder_input
+            print("Printing encoder input after changing value:", encoder_input)
         # print("Time taken to run for loop for generator:", timeit.default_timer() - start_time)
 
         # If writer exists, write losses
