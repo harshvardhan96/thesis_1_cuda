@@ -1481,7 +1481,8 @@ class Trainer():
         self.StylEx.D_opt.step()
 
         # train generator
-
+        print("before training gnerator alternate training value:", self.alternating_training)
+        print("Before training generator encoder_input:", encoder_input)
         if self.alternating_training:
             encoder_input = False
 
