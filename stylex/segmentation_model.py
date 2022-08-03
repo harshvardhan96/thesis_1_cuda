@@ -15,7 +15,7 @@ import deeplab
 from data_loader import CelebASegmentation
 from utils import download_file
 import cv2
-from gray2color import gray2color
+# from gray2color import gray2color
 from matplotlib import pyplot as plt
 import torchvision.models as models
 from torch.utils.data import DataLoader
