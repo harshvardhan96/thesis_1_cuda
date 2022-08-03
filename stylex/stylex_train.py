@@ -465,10 +465,10 @@ def classifier_kl_loss(real_classifier_logits, fake_classifier_logits):
     # else:
     #     print('?????????')
 
-    # real_classifier_probabilities = F.log_softmax(real_classifier_logits, dim=1)
-    # fake_classifier_probabilities = F.log_softmax(fake_classifier_logits, dim=1)
+    real_classifier_probabilities = F.log_softmax(real_classifier_logits, dim=1)
+    fake_classifier_probabilities = F.log_softmax(fake_classifier_logits, dim=1)
 
-    loss = kl_loss(fake_classifier_logits, real_classifier_logits)
+    loss = kl_loss(fake_classifier_probabilities, real_classifier_probabilities)
     return loss
 
 
